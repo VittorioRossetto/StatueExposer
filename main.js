@@ -51,9 +51,23 @@ const positionAttributeLocation = gl.getAttribLocation(program, 'position');
 gl.enableVertexAttribArray(positionAttributeLocation);
 gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
-// Clear the canvas
-gl.clearColor(0.0, 0.0, 0.0, 1.0);
-gl.clear(gl.COLOR_BUFFER_BIT);
-
-// Draw the rectangle
-gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+// Fetch MickeyMouse.obj
+fetch('MickeyMouse.obj')
+    .then(response => response.text())
+    .then(text => {
+        const lines = text.split('\n');
+        const positions = [];
+        for (const line of lines) {
+            if (line.startsWith('v ')) {
+                const parts = line.split(' ');
+                positions.push(parseFloat(parts[1]));
+                positions.push(parseFloat(parts[2]));
+                positions.push(parseFloat(parts[3]));
+            }
+        }
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(positionAttributeLocation);
+        gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 0, 0);
+    });
