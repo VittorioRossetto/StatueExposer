@@ -1,73 +1,266 @@
-// Create a canvas element
-const canvas = document.createElement('canvas');
-canvas.width = 400;
-canvas.height = 300;
-document.body.appendChild(canvas);
+"use strict";
 
-// Get the WebGL context
-const gl = canvas.getContext('webgl');
+var mesh = new Array();
+var positions = [];
+var normals = [];
+var texcoords = [];
+var numVertices;
+var ambient;   //Ka
+var diffuse;   //Kd
+var specular;  //Ks
+var emissive;  //Ke
+var shininess; //Ns
+var opacity;   //Ni
 
-// Create and compile the vertex shader
-const vertexShaderSource = `
-    attribute vec2 position;
-    void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
+function main() {
+    // Get A WebGL context
+    /** @type {HTMLCanvasElement} */
+    var canvas = document.getElementById("canvas");
+    var gl = canvas.getContext("webgl");
+    if (!gl) {
+        return;
     }
-`;
-const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-gl.shaderSource(vertexShader, vertexShaderSource);
-gl.compileShader(vertexShader);
 
-// Create and compile the fragment shader
-const fragmentShaderSource = `
-    void main() {
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    // Function to resize the canvas
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     }
-`;
-const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-gl.shaderSource(fragmentShader, fragmentShaderSource);
-gl.compileShader(fragmentShader);
+    
+    // Call the resize function initially
+    resizeCanvas();
 
-// Create the shader program
-const program = gl.createProgram();
-gl.attachShader(program, vertexShader);
-gl.attachShader(program, fragmentShader);
-gl.linkProgram(program);
-gl.useProgram(program);
+    //mesh.sourceMesh='data/boeing/boeing_3.obj';
+    mesh.sourceMesh='data/mickeyMouse/mickeyMouse.obj';
+    
+    LoadMesh(gl,mesh);
+    //console.log(mesh);
 
-// Create the vertex buffer
-const positionBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-const positions = [
-    -0.5, -0.5,
-    0.5, -0.5,
-    -0.5, 0.5,
-    0.5, 0.5,
-];
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+    // setup GLSL program
+    var program = webglUtils.createProgramFromScripts(gl, ["3d-vertex-shader", "3d-fragment-shader"]);
+    // Tell it to use our program (pair of shaders)
+    gl.useProgram(program);
 
-// Enable the position attribute
-const positionAttributeLocation = gl.getAttribLocation(program, 'position');
-gl.enableVertexAttribArray(positionAttributeLocation);
-gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+    // look up where the vertex data needs to go.
+    var positionLocation = gl.getAttribLocation(program, "a_position");
+    var normalLocation = gl.getAttribLocation(program, "a_normal");
+    var texcoordLocation = gl.getAttribLocation(program, "a_texcoord");
 
-// Fetch MickeyMouse.obj
-fetch('MickeyMouse.obj')
-    .then(response => response.text())
-    .then(text => {
-        const lines = text.split('\n');
-        const positions = [];
-        for (const line of lines) {
-            if (line.startsWith('v ')) {
-                const parts = line.split(' ');
-                positions.push(parseFloat(parts[1]));
-                positions.push(parseFloat(parts[2]));
-                positions.push(parseFloat(parts[3]));
-            }
-        }
-        const positionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-        gl.enableVertexAttribArray(positionAttributeLocation);
-        gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 0, 0);
+    // Create a buffer for positions
+    var positionBuffer = gl.createBuffer();
+    // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    // Put the positions in the buffer
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+    // Create a buffer for normals
+    var normalsBuffer = gl.createBuffer();
+    // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER mormalsBuffer)
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalsBuffer);
+    // Put the normals in the buffer
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+
+    // provide texture coordinates
+    var texcoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
+    // Set Texcoords
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texcoords), gl.STATIC_DRAW);
+
+    var ambientLight=[0.2,0.2,0.2];
+    var colorLight=[1.0,1.0,1.0];
+
+    gl.uniform3fv(gl.getUniformLocation(program, "diffuse" ), diffuse );
+    gl.uniform3fv(gl.getUniformLocation(program, "ambient" ), ambient); 
+    gl.uniform3fv(gl.getUniformLocation(program, "specular"), specular );	
+    gl.uniform3fv(gl.getUniformLocation(program, "emissive"), emissive );
+    //gl.uniform3fv(gl.getUniformLocation(program, "u_lightDirection" ), xxx );
+    gl.uniform3fv(gl.getUniformLocation(program, "u_ambientLight" ), ambientLight );
+    gl.uniform3fv(gl.getUniformLocation(program, "u_colorLight" ), colorLight );
+
+    gl.uniform1f(gl.getUniformLocation(program, "shininess"), shininess);
+    gl.uniform1f(gl.getUniformLocation(program, "opacity"), opacity);
+
+    // Turn on the position attribute
+    gl.enableVertexAttribArray(positionLocation);
+    // Bind the position buffer.
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    // Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+    var size = 3;          // 3 components per iteration
+    var type = gl.FLOAT;   // the data is 32bit floats
+    var normalize = false; // don't normalize the data
+    var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+    var offset = 0;        // start at the beginning of the buffer
+    gl.vertexAttribPointer(positionLocation, size, type, normalize, stride, offset);
+
+    // Turn on the normal attribute
+    gl.enableVertexAttribArray(normalLocation);
+    // Bind the normal buffer.
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalsBuffer);
+    gl.vertexAttribPointer(normalLocation, size, type, normalize, stride, offset);
+
+    // Turn on the texcord attribute
+    gl.enableVertexAttribArray(texcoordLocation);
+    // Bind the position buffer.
+    gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
+    // Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+    size = 2;          // 2 components per iteration
+    gl.vertexAttribPointer(texcoordLocation, size, type, normalize, stride, offset);
+
+    var fieldOfViewRadians = degToRad(30);
+    var modelXRotationRadians = degToRad(0);
+    var modelYRotationRadians = degToRad(0);
+
+    // Compute the projection matrix
+    var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    //  zmin=0.125;
+    var zmin=0.1;
+    var projectionMatrix = m4.perspective(fieldOfViewRadians, aspect, zmin, 200);
+
+    var cameraPosition = [4.5, 4.5, 2];
+    var up = [0, 0, 1];
+    var target = [0, 0, 0];
+
+    // Compute the camera's matrix using look at.
+    var cameraMatrix = m4.lookAt(cameraPosition, target, up);
+
+    // Make a view matrix from the camera matrix.
+    var viewMatrix = m4.inverse(cameraMatrix);
+
+    var matrixLocation = gl.getUniformLocation(program, "u_world");
+    var textureLocation = gl.getUniformLocation(program, "diffuseMap");
+    var viewMatrixLocation = gl.getUniformLocation(program, "u_view");
+    var projectionMatrixLocation = gl.getUniformLocation(program, "u_projection");
+    var lightWorldDirectionLocation = gl.getUniformLocation(program, "u_lightDirection");
+    var viewWorldPositionLocation = gl.getUniformLocation(program, "u_viewWorldPosition");
+
+    gl.uniformMatrix4fv(viewMatrixLocation, false, viewMatrix);
+    gl.uniformMatrix4fv(projectionMatrixLocation, false, projectionMatrix);
+            
+    // set the light position
+    gl.uniform3fv(lightWorldDirectionLocation, m4.normalize([-1, 3, 5]));
+
+    // set the camera/view position
+    gl.uniform3fv(viewWorldPositionLocation, cameraPosition);
+
+    // Tell the shader to use texture unit 0 for diffuseMap
+    gl.uniform1i(textureLocation, 0);
+
+    function isPowerOf2(value) {
+        return (value & (value - 1)) === 0;
+    }
+
+    function radToDeg(r) {
+        return r * 180 / Math.PI;
+    }
+
+    function degToRad(d) {
+        return d * Math.PI / 180;
+    }
+
+    // Get the starting time.
+    let isAnimating = true;
+    let then = 0;
+
+    // Variables for mouse/touch interaction
+    let isDragging = false;
+    let lastX = 0;
+    let lastY = 0;
+    let rotationSpeed = 0.01;
+
+    // Event listeners for mouse interaction
+    canvas.addEventListener('mousedown', (event) => {
+        isDragging = true;
+        lastX = event.clientX;
+        lastY = event.clientY;
     });
+
+    canvas.addEventListener('mousemove', (event) => {
+        if (isDragging) {
+            let deltaX = event.clientX - lastX;
+            let deltaY = event.clientY - lastY;
+            modelYRotationRadians += deltaX * rotationSpeed;
+            modelXRotationRadians += deltaY * rotationSpeed;
+            lastX = event.clientX;
+            lastY = event.clientY;
+        }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+    // Event listeners for touch interaction
+    canvas.addEventListener('touchstart', (event) => {
+        isDragging = true;
+        lastX = event.touches[0].clientX;
+        lastY = event.touches[0].clientY;
+    });
+
+    canvas.addEventListener('touchmove', (event) => {
+        if (isDragging) {
+            let deltaX = event.touches[0].clientX - lastX;
+            let deltaY = event.touches[0].clientY - lastY;
+            modelYRotationRadians += deltaX * rotationSpeed;
+            modelXRotationRadians += deltaY * rotationSpeed;
+            lastX = event.touches[0].clientX;
+            lastY = event.touches[0].clientY;
+        }
+    });
+
+    canvas.addEventListener('touchend', () => {
+        isDragging = false;
+    });
+
+    // Start the animation
+    requestAnimationFrame(drawScene);
+
+    // Draw the scene.
+    function drawScene(time) {
+        if (!isAnimating) return;
+
+        // convert to seconds
+        time *= 0.001;
+        // Subtract the previous time from the current time
+        var deltaTime = time - then;
+        // Remember the current time for the next frame.
+        then = time;
+
+        // Tell WebGL how to convert from clip space to pixels
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+        //gl.enable(gl.CULL_FACE);
+        gl.enable(gl.DEPTH_TEST);
+
+        // Clear the canvas AND the depth buffer.
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        var matrix = m4.identity();
+        matrix = m4.xRotate(matrix, modelXRotationRadians);
+        matrix = m4.yRotate(matrix, modelYRotationRadians);
+
+        // Set the matrix.
+        gl.uniformMatrix4fv(matrixLocation, false, matrix);
+
+        // Draw the geometry.
+        gl.drawArrays(gl.TRIANGLES, 0, numVertices);
+
+        requestAnimationFrame(drawScene);
+    }
+
+    // Event listener for spacebar press
+    window.addEventListener('keydown', function(event) {
+        if (event.code === 'Space') {
+            //Log current camera position
+            console.log("Camera Position: " + cameraPosition);
+            /*
+            isAnimating = !isAnimating;
+            if (isAnimating) {
+                then = performance.now() * 0.001; // Reset the time
+                requestAnimationFrame(drawScene);
+            }*/
+        }
+    });
+}
+
+main();
