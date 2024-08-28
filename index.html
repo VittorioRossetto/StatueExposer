@@ -4,26 +4,71 @@
     <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>WebGL - Textures - Texture Atlas</title>
+    <title>ProgettoGrafica</title>
     <!--<link type="text/css" href="resources/webgl-tutorials.css" rel="stylesheet" />-->
     </head>
     <body>
         <style>
             body, html {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
             }
             canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
+                display: block;
+                width: 100%;
+                height: 100%;
+            }
+            #panel {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                background: rgba(255, 255, 255, 0.9); /* Slightly more opaque */
+                padding: 15px; /* Increased padding */
+                border-radius: 8px; /* Slightly more rounded corners */
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+                border: 1px solid rgba(0, 0, 0, 0.1); /* Light border */
+                font-family: 'Arial', sans-serif; /* Modern font */
+                font-size: 14px; /* Slightly larger font size */
+                color: #333; /* Darker text color */
+            }
+
+            #resetViewButton, #togglePanelButton {
+                margin-top: 10px;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                background-color: #007BFF;
+                color: white;
+                font-size: 14px;
+                cursor: pointer;
+            }
+
+            #resetViewButton:hover, #togglePanelButton:hover {
+                background-color: #0056b3;
+            }
+            #togglePanelButton {
+                position: absolute;
+                top: 10px;
+                right: 10px;
             }
         </style>
     <canvas id="canvas" width="600" height="600"></canvas>
     </body>
+    <div id="panel">
+        <label for="fov">Field of View:</label>
+        <input type="range" id="fov" min="10" max="90" value="30"><br>
+        <label for="cameraX">Camera X:</label>
+        <input type="range" id="cameraX" min="-10" max="10" value="0"><br>
+        <label for="cameraY">Camera Y:</label>
+        <input type="range" id="cameraY" min="-10" max="10" value="-1"><br>
+        <label for="cameraZ">Camera Z:</label>
+        <input type="range" id="cameraZ" min="0" max="10" value="5"><br>
+        <button id="resetViewButton">Reset View</button>
+    </div>
+    <button id="togglePanelButton">Option Panel</button>
     <!-- vertex shader -->
     <script id="3d-vertex-shader" type="x-shader/x-vertex">
     attribute vec4 a_position;

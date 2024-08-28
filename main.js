@@ -31,6 +31,15 @@ function main() {
     // Call the resize function initially
     resizeCanvas();
 
+    document.getElementById('togglePanelButton').addEventListener('click', () => {
+        const panel = document.getElementById('panel');
+        if (panel.style.display === 'none') {
+            panel.style.display = 'block';
+        } else {
+            panel.style.display = 'none';
+        }
+    });
+
     //mesh.sourceMesh='data/boeing/boeing_3.obj';
     mesh.sourceMesh='data/mickeyMouse/mickeyMouse.obj';
     
@@ -117,15 +126,74 @@ function main() {
     var zmin=0.1;
     var projectionMatrix = m4.perspective(fieldOfViewRadians, aspect, zmin, 200);
 
-    var cameraPosition = [4.5, 4.5, 2];
+    // Get the input elements for camera control
+    const fovInput = document.getElementById('fov');
+    const cameraXInput = document.getElementById('cameraX');
+    const cameraYInput = document.getElementById('cameraY');
+    const cameraZInput = document.getElementById('cameraZ');
+
+    var cameraPosition = [0, -1, 5];
     var up = [0, 0, 1];
     var target = [0, 0, 0];
 
-    // Compute the camera's matrix using look at.
-    var cameraMatrix = m4.lookAt(cameraPosition, target, up);
+    // Add event listeners to the input elements
+    fovInput.addEventListener('input', updateCamera);
+    cameraXInput.addEventListener('input', updateCamera);
+    cameraYInput.addEventListener('input', updateCamera);
+    cameraZInput.addEventListener('input', updateCamera);
 
-    // Make a view matrix from the camera matrix.
-    var viewMatrix = m4.inverse(cameraMatrix);
+
+    var viewMatrix = m4.lookAt(cameraPosition, target, up);
+
+    function updateCamera() {
+        var cameraMatrix = m4.lookAt(cameraPosition, target, up);
+        viewMatrix = m4.inverse(cameraMatrix);
+        gl.uniformMatrix4fv(viewMatrixLocation, false, viewMatrix);
+        gl.uniform3fv(viewWorldPositionLocation, cameraPosition);
+    }
+    
+    // Event listeners to update camera parameters and call updateCamera
+    fovInput.addEventListener('input', () => {
+        fieldOfViewRadians = degToRad(fovInput.value);
+        drawScene();
+    });
+    
+    cameraXInput.addEventListener('input', () => {
+        cameraPosition[0] = parseFloat(cameraXInput.value);
+        updateCamera();
+        drawScene();
+    });
+    
+    cameraYInput.addEventListener('input', () => {
+        cameraPosition[1] = parseFloat(cameraYInput.value);
+        updateCamera();
+        drawScene();
+    });
+    
+    cameraZInput.addEventListener('input', () => {
+        cameraPosition[2] = parseFloat(cameraZInput.value);
+        updateCamera();
+        drawScene();
+    });
+
+    document.getElementById('resetViewButton').addEventListener('click', () => {
+        // Reset camera position and FOV to default values
+        cameraPosition = [0, -1, 5]; // Default camera position
+        fieldOfViewRadians = degToRad(30); // Default FOV
+    
+        // Update the input fields to reflect the default values
+        cameraXInput.value = cameraPosition[0];
+        cameraYInput.value = cameraPosition[1];
+        cameraZInput.value = cameraPosition[2];
+        fovInput.value = 60; // Default FOV in degrees
+    
+        // Update the camera and redraw the scene
+        updateCamera();
+        drawScene();
+    });
+    
+    // Initial camera setup
+    updateCamera();
 
     var matrixLocation = gl.getUniformLocation(program, "u_world");
     var textureLocation = gl.getUniformLocation(program, "diffuseMap");
@@ -134,14 +202,14 @@ function main() {
     var lightWorldDirectionLocation = gl.getUniformLocation(program, "u_lightDirection");
     var viewWorldPositionLocation = gl.getUniformLocation(program, "u_viewWorldPosition");
 
-    gl.uniformMatrix4fv(viewMatrixLocation, false, viewMatrix);
+    //gl.uniformMatrix4fv(viewMatrixLocation, false, viewMatrix);
     gl.uniformMatrix4fv(projectionMatrixLocation, false, projectionMatrix);
             
     // set the light position
     gl.uniform3fv(lightWorldDirectionLocation, m4.normalize([-1, 3, 5]));
 
     // set the camera/view position
-    gl.uniform3fv(viewWorldPositionLocation, cameraPosition);
+    //gl.uniform3fv(viewWorldPositionLocation, cameraPosition);
 
     // Tell the shader to use texture unit 0 for diffuseMap
     gl.uniform1i(textureLocation, 0);
@@ -166,7 +234,7 @@ function main() {
     let isDragging = false;
     let lastX = 0;
     let lastY = 0;
-    let rotationSpeed = 0.01;
+    let rotationSpeed = 0.05;
 
     // Event listeners for mouse interaction
     canvas.addEventListener('mousedown', (event) => {
@@ -174,18 +242,34 @@ function main() {
         lastX = event.clientX;
         lastY = event.clientY;
     });
-
+    
     canvas.addEventListener('mousemove', (event) => {
         if (isDragging) {
             let deltaX = event.clientX - lastX;
             let deltaY = event.clientY - lastY;
-            modelYRotationRadians += deltaX * rotationSpeed;
-            modelXRotationRadians += deltaY * rotationSpeed;
+    
+            if (deltaX > 0) {
+                modelYRotationRadians += rotationSpeed;
+            } else if (deltaX < 0) { 
+                modelYRotationRadians -= rotationSpeed;
+            }
+
+            /*if (deltaY > 0) {
+                modelXRotationRadians += rotationSpeed;
+            } else if (deltaY < 0) {
+                modelXRotationRadians -= rotationSpeed;
+            }*/
+    
+            // Update the camera view matrix to look at the target object
+            //updateCamera();
+    
+            // Store the current mouse position for the next movement calculation
             lastX = event.clientX;
             lastY = event.clientY;
         }
     });
-
+    
+    
     canvas.addEventListener('mouseup', () => {
         isDragging = false;
     });
@@ -196,24 +280,39 @@ function main() {
         lastX = event.touches[0].clientX;
         lastY = event.touches[0].clientY;
     });
-
+    
     canvas.addEventListener('touchmove', (event) => {
         if (isDragging) {
             let deltaX = event.touches[0].clientX - lastX;
             let deltaY = event.touches[0].clientY - lastY;
-            modelYRotationRadians += deltaX * rotationSpeed;
-            modelXRotationRadians += deltaY * rotationSpeed;
+    
+            if (deltaX > 0) {
+                modelYRotationRadians += rotationSpeed;
+            } else if (deltaX < 0) {
+                modelYRotationRadians -= rotationSpeed;
+            }
+
+            /*
+            if (deltaY > 0) {
+                modelXRotationRadians += rotationSpeed;
+            } else if (deltaY < 0) {
+                modelXRotationRadians -= rotationSpeed;
+            }*/
+    
+            //updateCamera();
             lastX = event.touches[0].clientX;
             lastY = event.touches[0].clientY;
         }
     });
-
+    
     canvas.addEventListener('touchend', () => {
         isDragging = false;
     });
 
     // Start the animation
     requestAnimationFrame(drawScene);
+
+    updateCamera();
 
     // Draw the scene.
     function drawScene(time) {
