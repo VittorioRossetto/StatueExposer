@@ -66,6 +66,7 @@ uniform vec3 u_lightDirection; // Direction of the light source
 uniform vec3 u_ambientLight; // Ambient light color
 uniform int u_bumpMapping; // Flag to indicate if bump mapping is enabled
 uniform sampler2D normalMap; // Normal map for bump mapping
+uniform bool u_shadow; // Flag to indicate if shadows are enabled
 
 void main () {
   // Normalize the normal vector and adjust based on the fragment facing
@@ -111,11 +112,14 @@ void main () {
   float effectiveOpacity = opacity * diffuseMapColor.a * v_color.a;
 
   // Compute the final color and assign to gl_FragColor
-  gl_FragColor = vec4(
-      emissive + // Emissive term
-      ambient * u_ambientLight + // Ambient term
-      effectiveDiffuse * fakeLight + // Diffuse term
-      specular * pow(specularLight, shininess), // Specular term
-      effectiveOpacity); // Final opacity
+  vec3 finalColor = emissive + // Emissive term
+                    ambient * u_ambientLight + // Ambient term
+                    effectiveDiffuse * fakeLight; // Diffuse term
+
+  if (u_shadow) {
+    finalColor += specular * pow(specularLight, shininess); // Specular term
+  }
+
+  gl_FragColor = vec4(finalColor, effectiveOpacity); // Final opacity
 }
 `;

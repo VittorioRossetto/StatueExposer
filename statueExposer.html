@@ -63,13 +63,14 @@
         <label for="cameraX">Camera X:</label>
         <input type="range" id="cameraX" min="-10" max="10" value="0"><br>
         <label for="cameraY">Camera Y:</label>
-        <input type="range" id="cameraY" min="-10" max="10" value="1"><br>
+        <input type="range" id="cameraY" min="-10" max="10" value="-1"><br>
         <label for="cameraZ">Camera Z:</label>
         <input type="range" id="cameraZ" min="0" max="100" value="5"><br>
         <!-- We add a little paragraph explaining that the view can be modified with keyboard -->
         <p>You can also use the W A S D keys to move the camera</p>
         <button id="resetViewButton">Reset View</button>
-        <button id="ShadowButton">Disable Shadows</button>
+        <button id="ShadowButton">Disable Shininess</button>
+        <!--<input type="file" id="fileInput" accept=".obj">-->
     </div>
     <button id="togglePanelButton">Option Panel</button>
     <script id="skybox-vertex-shader" type="x-shader/x-vertex">

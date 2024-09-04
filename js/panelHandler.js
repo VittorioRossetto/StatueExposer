@@ -56,5 +56,5 @@ document.getElementById('ShadowButton').addEventListener('click', () => {
 
     // Update the button text
     const shadowButton = document.getElementById('ShadowButton');
-    shadowButton.textContent = shadow ? 'Disable Shadows' : 'Enable Shadows';
+    shadowButton.textContent = shadow ? 'Disable Shininess' : 'Enable Shininess';
 });

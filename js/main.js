@@ -91,7 +91,10 @@ async function main() {
           z: u_world[14]};
     
         gl.useProgram(meshProgramInfo.program);
-    
+          
+        // Set the shadow uniform
+      gl.uniform1i(gl.getUniformLocation(meshProgramInfo.program, 'u_shadow'), shadow ? 1 : 0);
+
         // calls gl.uniform
         webglUtils.setUniforms(meshProgramInfo, sharedUniforms);
     
