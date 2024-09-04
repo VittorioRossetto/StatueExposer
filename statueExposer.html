@@ -35,7 +35,7 @@
                 color: #333; /* Darker text color */
             }
 
-            #resetViewButton, #togglePanelButton {
+            #resetViewButton, #togglePanelButton, #ShadowButton {
                 margin-top: 10px;
                 padding: 10px 20px;
                 border: none;
@@ -46,7 +46,7 @@
                 cursor: pointer;
             }
 
-            #resetViewButton:hover, #togglePanelButton:hover {
+            #resetViewButton:hover, #togglePanelButton:hover, #ShadowButton:hover {
                 background-color: #0056b3;
             }
             #togglePanelButton {
@@ -59,88 +59,56 @@
     </body>
     <div id="panel">
         <label for="fov">Field of View:</label>
-        <input type="range" id="fov" min="10" max="90" value="30"><br>
+        <input type="range" id="fov" min="0" max="90" value="30"><br>
         <label for="cameraX">Camera X:</label>
         <input type="range" id="cameraX" min="-10" max="10" value="0"><br>
         <label for="cameraY">Camera Y:</label>
-        <input type="range" id="cameraY" min="-10" max="10" value="-1"><br>
+        <input type="range" id="cameraY" min="-10" max="10" value="1"><br>
         <label for="cameraZ">Camera Z:</label>
-        <input type="range" id="cameraZ" min="0" max="10" value="5"><br>
+        <input type="range" id="cameraZ" min="0" max="100" value="5"><br>
+        <!-- We add a little paragraph explaining that the view can be modified with keyboard -->
+        <p>You can also use the W A S D keys to move the camera</p>
         <button id="resetViewButton">Reset View</button>
+        <button id="ShadowButton">Disable Shadows</button>
     </div>
     <button id="togglePanelButton">Option Panel</button>
-    <!-- vertex shader -->
-    <script id="3d-vertex-shader" type="x-shader/x-vertex">
-    attribute vec4 a_position;
-    attribute vec3 a_normal;
-    attribute vec2 a_texcoord;
-
-    uniform mat4 u_projection;
-    uniform mat4 u_view;
-    uniform mat4 u_world;
-    uniform vec3 u_viewWorldPosition;
-
-    varying vec3 v_normal;
-    varying vec3 v_surfaceToView;
-    varying vec2 v_texcoord;
-
-    void main() {
-        vec4 worldPosition = u_world * a_position;
-        gl_Position = u_projection * u_view * worldPosition;
-        v_surfaceToView = u_viewWorldPosition - worldPosition.xyz;
-        v_normal = mat3(u_world) * a_normal;
-        v_texcoord = a_texcoord;
-    }
+    <script id="skybox-vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 a_position;
+        varying vec4 v_position;
+        void main() {
+        v_position = a_position;
+        gl_Position = a_position;
+        gl_Position.z = 1.0;
+        }
     </script>
-    <!-- fragment shader -->
-    <script id="3d-fragment-shader" type="x-shader/x-fragment">
-    precision highp float;
-
-    varying vec3 v_normal;
-    varying vec3 v_surfaceToView;
-    varying vec2 v_texcoord;
-
-    uniform vec3 diffuse;
-    uniform vec3 ambient;
-    uniform vec3 emissive;
-    uniform vec3 specular;
-    uniform float shininess;
-    uniform float opacity;
-    uniform vec3 u_lightDirection;
-    uniform vec3 u_ambientLight;
-    uniform vec3 u_colorLight;
-    uniform sampler2D diffuseMap;
-
-    void main () {
-        vec3 normal = normalize(v_normal);
-
-        vec3 surfaceToViewDirection = normalize(v_surfaceToView);
-        vec3 halfVector = normalize(u_lightDirection + surfaceToViewDirection);
-
-        float fakeLight = dot(u_lightDirection, normal) * .5 + .5;
-        float specularLight = clamp(dot(normal, halfVector), 0.0, 1.0);
-
-        vec4 diffuseMapColor = texture2D(diffuseMap, v_texcoord);
-        vec3 effectiveDiffuse = diffuse * diffuseMapColor.rgb * u_colorLight.rgb;
-        float effectiveOpacity = opacity * diffuseMapColor.a;
-
-        gl_FragColor = vec4(
-            emissive +
-            ambient * u_ambientLight +
-            effectiveDiffuse * fakeLight +
-            specular * pow(specularLight, shininess),
-            effectiveOpacity);
-    }
+    <script id="skybox-fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+    
+        uniform samplerCube u_skybox;
+        uniform mat4 u_viewDirectionProjectionInverse;
+    
+        varying vec4 v_position;
+        void main() {
+        vec4 t = u_viewDirectionProjectionInverse * v_position;
+        gl_FragColor = textureCube(u_skybox, normalize(t.xyz / t.w));
+        }
     </script>
 
     <script type="text/javascript" src="resources/mesh_utils.js"></script>
     <script type="text/javascript" src="resources/glm_utils.js"></script>
-    <script type="text/javascript" src="resources/webgl-utils.js"></script>
-    <script type="text/javascript" src="resources/m4.js"></script>
+    <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
+    <script src="https://webglfundamentals.org/webgl/resources/m4.js"></script>
     <script type="text/javascript" src="resources/jquery-3.6.0.js"></script>
-    <script type="text/javascript" src="load_mesh.js"></script>
-    <script type="text/javascript" src="main.js"></script>
-
+    <script type="text/javascript" src="js/shaders.js"></script>
+    <script type="text/javascript" src="js/generalUtils.js"></script>
+    <script type="text/javascript" src="js/tangentGenerator.js"></script>
+    <script type="text/javascript" src="js/load_mesh.js"></script>
+    <script type="text/javascript" src="js/skybox.js"></script>
+    <script type="text/javascript" src="js/textureUtils.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <script type="text/javascript" src="js/keyHandler.js"></script>
+    <script type="text/javascript" src="js/panelHandler.js"></script>
+    
 </html>
 
 
