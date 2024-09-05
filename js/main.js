@@ -2,7 +2,7 @@
 
 var cameraPositionMain = m4.identity()
 // Set the camera position to 0 0 500
-cameraPositionMain = m4.translate(cameraPositionMain, 0, 0, 500);
+cameraPositionMain = m4.translate(cameraPositionMain, 0, 70, 700);
 let viewMatrixMain;
 let projection;
 
@@ -24,8 +24,15 @@ async function main() {
     // compiles and links the shaders, looks up attribute and uniform locations
     const meshProgramInfo = webglUtils.createProgramInfo(gl, [vs, fs]);
 
+    // Load the model statue
     const objHref_statue = '../data/mickeyMouse/mickeyMouse.obj';
     var model_statue = await loadModel(gl, objHref_statue);
+
+    // Load the model pedestal
+    const objHref_pedestal = '../data/pedestal/pedestal.obj';
+    var model_pedestal = await loadModel(gl, objHref_pedestal);
+
+
 
     // Set zNear and zFar to something hopefully appropriate
     // for the size of this object.
@@ -62,10 +69,19 @@ async function main() {
         let u_world = m4.identity();
         u_world = m4.translate(u_world_statue, ...model_statue.objOffset);
         u_world = rotateObject([0, 0, 0], u_world)
-        u_world = moveObject([0, -1, -5], u_world);
+        u_world = moveObject([0, 220, -5], u_world);
         u_world = m4.xRotate(u_world, modelXRotationRadians);
         u_world = m4.yRotate(u_world, modelYRotationRadians);
-    
+
+        // Compute the world matrix for the pedestal
+        let u_world_pedestal = m4.identity();
+        u_world_pedestal = m4.translate(u_world_pedestal, ...model_pedestal.objOffset);
+        u_world_pedestal = rotateObject([Math.PI/2, 0, 0], u_world_pedestal);
+        u_world_pedestal = m4.xRotate(u_world_pedestal, Math.PI / 2); // Rotate 90 degrees upwards
+        u_world_pedestal = m4.scale(u_world_pedestal, 10, 10, 10); // Scale the pedestal to make it bigger
+        u_world_pedestal = m4.xRotate(u_world_pedestal, modelXRotationRadians);
+        u_world_pedestal = m4.zRotate(u_world_pedestal, -modelYRotationRadians);
+
         var sharedUniforms;
         viewMatrixMain = m4.inverse(u_world);
     
@@ -80,9 +96,8 @@ async function main() {
           ambient: [1.0, 1.0, 1.0],
           emissive: [1.0, 1.0, 1.0],
           specular: [1.0, 1.0, 1.0],
-          u_ambientLight: [0.03, 0.03, 0.03]
+          u_ambientLight: [0.03, 0.03, 0.03],
         };
-        
     
         // Extract statue position from u_world matrix
         let statuetPosition = {
@@ -100,6 +115,9 @@ async function main() {
     
         renderGenericModel(u_world, model_statue, meshProgramInfo);
     
+        // Render the pedestal
+        renderGenericModel(u_world_pedestal, model_pedestal, meshProgramInfo);
+
         requestAnimationFrame(render);
         updateCameraPosition();
     }
