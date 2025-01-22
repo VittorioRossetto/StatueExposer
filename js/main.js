@@ -15,10 +15,13 @@ let frontLightZ = -1;
 var u_world_statue = m4.identity();
 
 var model_portrait;
+var model_statue;
 
 var modelXRotationRadians = degToRad(0);
 var modelYRotationRadians = degToRad(0);
 let rotationSpeed = 0.1;
+
+let initialMaterials; // Global variable to store the initial materials
 
 async function main() {
     // compiles and links the shaders, looks up attribute and uniform locations
@@ -26,13 +29,15 @@ async function main() {
 
     // Load the model statue
     const objHref_statue = '../data/mickeyMouse/mickeyMouse.obj';
-    var model_statue = await loadModel(gl, objHref_statue);
+    model_statue = await loadModel(gl, objHref_statue);
 
     // Load the model pedestal
     const objHref_pedestal = '../data/pedestal/pedestal.obj';
     var model_pedestal = await loadModel(gl, objHref_pedestal);
 
-
+    const mtlHref_statue = '../data/mickeyMouse/mickeyMouse.mtl';
+    const materialsText = await fetch(mtlHref_statue).then((res) => res.text());
+    initialMaterials = parseMTL(materialsText);
 
     // Set zNear and zFar to something hopefully appropriate
     // for the size of this object.
@@ -125,17 +130,19 @@ async function main() {
 }
 
 function renderGenericModel(u_world, model, meshProgramInfo) {
-    for (const {bufferInfo, material} of model.parts) {
-      // calls gl.bindBuffer, gl.enableVertexAttribArray, gl.vertexAttribPointer
+  for (const { bufferInfo, material } of model.parts) {
       webglUtils.setBuffersAndAttributes(gl, meshProgramInfo, bufferInfo);
-      // calls gl.uniform
       webglUtils.setUniforms(meshProgramInfo, {
-        u_world,
+          u_world,
+          u_diffuse: material.diffuse || [1, 1, 1, 1],
+          u_specular: material.specular || [1, 1, 1, 1],
+          u_emissive: material.emissive || [0, 0, 0, 1],
+          u_shininess: material.shininess || 50,
       }, material);
-      // calls gl.drawArrays or gl.drawElements
       webglUtils.drawBufferInfo(gl, bufferInfo);
-    }
+  }
 }
+
 
 async function loadModel(gl, objHref) {
     const response = await fetch(objHref);
@@ -225,6 +232,70 @@ async function loadModel(gl, objHref) {
   
     return {parts, objOffset}
 }
+
+async function loadModelFromFile(gl, file) {
+  return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+          const text = event.target.result;
+          const obj = parseOBJ(text);
+
+          if (!initialMaterials) {
+              reject(new Error("Initial materials are not loaded."));
+              return;
+          }
+
+          // Apply the initial materials to the uploaded model
+          const parts = obj.geometries.map(({ data }) => {
+              if (!data.color) {
+                  data.color = { value: [1, 1, 1, 1] }; // Default to white
+              }
+              const bufferInfo = webglUtils.createBufferInfoFromArrays(gl, data);
+              return {
+                  material: {
+                      ...defaultMaterial,
+                      ...initialMaterials.defaultMaterial, // Apply initial materials
+                  },
+                  bufferInfo,
+              };
+          });
+
+          const extents = getGeometriesExtents(obj.geometries);
+          const range = m4.subtractVectors(extents.max, extents.min);
+          const objOffset = m4.scaleVector(
+              m4.addVectors(extents.min, m4.scaleVector(range, 0.5)),
+              -1
+          );
+
+          resolve({ parts, objOffset });
+      };
+      reader.onerror = (err) => reject(err);
+      reader.readAsText(file);
+  });
+}
+
+
+document.getElementById('fileInput').addEventListener('change', async (event) => {
+  const feedback = document.getElementById('feedback');
+  const file = event.target.files[0];
+  if (file && file.name.endsWith('.obj')) {
+      feedback.textContent = "Loading...";
+      try {
+          const userModel = await loadModelFromFile(gl, file);
+          model_statue = userModel;
+          feedback.textContent = "Model loaded successfully!";
+      } catch (err) {
+          feedback.textContent = "Error loading model. Please try again.";
+          console.error(err);
+      }
+  } else {
+      feedback.textContent = "Invalid file type. Please upload a .obj file.";
+  }
+});
+
+
+
+
 
 function getRayFromMouse(mouseX, mouseY) {
     const rect = gl.canvas.getBoundingClientRect();

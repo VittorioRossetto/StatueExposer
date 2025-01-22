@@ -19,28 +19,39 @@ var shadow = true;
 
 // Event listeners to update camera parameters and call updateCamera
 fovInput.addEventListener('input', () => {
-    fieldOfViewRadians = degToRad(fovInput.value);
+    const fovValue = parseFloat(fovInput.value);
+    if (fovValue >= 30 && fovValue <= 90) {
+        fieldOfViewRadians = degToRad(fovValue);
+    } else {
+        console.warn('FOV value out of range:', fovValue);
+    }
 });
 
 cameraXInput.addEventListener('input', () => {
-    m4.translate(cameraPositionMain, (cameraXInput.value - lastX) * cameraSpeed, 0, 0, cameraPositionMain);
-    lastX = cameraXInput.value;
+    const newX = parseFloat(cameraXInput.value);
+    m4.translate(cameraPositionMain, (newX - lastX) * cameraSpeed, 0, 0, cameraPositionMain);
+    lastX = newX;
+    console.log('Camera X position updated:', cameraPositionMain);
 });
 
 cameraYInput.addEventListener('input', () => {
-    m4.translate(cameraPositionMain, 0, (cameraYInput.value - lastY) * cameraSpeed, 0, cameraPositionMain);
-    lastY = cameraYInput.value;
+    const newY = parseFloat(cameraYInput.value);
+    m4.translate(cameraPositionMain, 0, (newY - lastY) * cameraSpeed, 0, cameraPositionMain);
+    lastY = newY;
+    console.log('Camera Y position updated:', cameraPositionMain);
 });
 
 cameraZInput.addEventListener('input', () => {
-    m4.translate(cameraPositionMain, 0, 0, (cameraZInput.value - lastZ) * cameraSpeed, cameraPositionMain);
-    lastZ = cameraZInput.value;
+    const newZ = parseFloat(cameraZInput.value);
+    m4.translate(cameraPositionMain, 0, 0, (newZ - lastZ) * cameraSpeed, cameraPositionMain);
+    lastZ = newZ;
+    console.log('Camera Z position updated:', cameraPositionMain);
 });
 
 document.getElementById('resetViewButton').addEventListener('click', () => {
     // Reset camera position and FOV to default values
     cameraPositionMain = m4.identity();
-    cameraPositionMain = m4.translate(cameraPositionMain, 0, 0, 500);
+    cameraPositionMain = m4.translate(cameraPositionMain, 0, 70, 700);
     fieldOfViewRadians = degToRad(30); // Default FOV
 
     // Update the input fields to reflect the default values
