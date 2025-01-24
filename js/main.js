@@ -1,6 +1,6 @@
 "use strict";
 
-var cameraPositionMain = m4.identity()
+var cameraPositionMain = m4.identity();
 // Set the camera position to 0 0 500
 cameraPositionMain = m4.translate(cameraPositionMain, 0, 70, 700);
 let viewMatrixMain;
@@ -113,7 +113,15 @@ async function main() {
         gl.useProgram(meshProgramInfo.program);
           
         // Set the shadow uniform
-      gl.uniform1i(gl.getUniformLocation(meshProgramInfo.program, 'u_shadow'), shadow ? 1 : 0);
+        gl.uniform1i(gl.getUniformLocation(meshProgramInfo.program, 'u_shadow'), shadow ? 1 : 0);
+
+        // Set the color uniform
+        const colorLocation = gl.getUniformLocation(meshProgramInfo.program, "u_color");
+        gl.uniform4fv(colorLocation, [1, 1, 1, 1]); // Example color
+
+        // Set the reverse light direction uniform
+        const reverseLightDirectionLocation = gl.getUniformLocation(meshProgramInfo.program, "u_reverseLightDirection");
+        gl.uniform3fv(reverseLightDirectionLocation, [0.5, 0.7, 1]);
 
         // calls gl.uniform
         webglUtils.setUniforms(meshProgramInfo, sharedUniforms);
@@ -143,7 +151,6 @@ function renderGenericModel(u_world, model, meshProgramInfo) {
   }
 }
 
-
 async function loadModel(gl, objHref) {
     const response = await fetch(objHref);
     const text = await response.text();
@@ -172,29 +179,14 @@ async function loadModel(gl, objHref) {
     }
   
     const parts = obj.geometries.map(({material, data}) => {
-      // Because data is just named arrays like this
-      //
-      // {
-      //   position: [...],
-      //   texcoord: [...],
-      //   normal: [...],
-      // }
-      //
-      // and because those names match the attributes in our vertex
-      // shader we can pass it directly into `createBufferInfoFromArrays`
-  
       if (data.color) {
         if (data.position.length === data.color.length) {
-          // it's 3. The our helper library assumes 4 so we need
-          // to tell it there are only 3.
           data.color = { numComponents: 3, data: data.color };
         }
       } else {
-        // there are no vertex colors so just use constant white
         data.color = { value: [1, 1, 1, 1] };
       }
   
-      // Generate tangents if data is available
       if (data.texcoord && data.normal) {
         data.tangent = generateTangents(data.position, data.texcoord);
       } else {
@@ -209,8 +201,6 @@ async function loadModel(gl, objHref) {
         data.normal = { value: [0, 0, 1] };
       }
   
-      // create a buffer for each array by calling
-      // gl.createBuffer, gl.bindBuffer, gl.bufferData
       const bufferInfo = webglUtils.createBufferInfoFromArrays(gl, data);
       return {
         material: {
@@ -223,7 +213,6 @@ async function loadModel(gl, objHref) {
   
     const extents = getGeometriesExtents(obj.geometries);
     const range = m4.subtractVectors(extents.max, extents.min);
-    // amount to move the object so its center is at the origin
     const objOffset = m4.scaleVector(
         m4.addVectors(
           extents.min,
@@ -240,22 +229,34 @@ async function loadModelFromFile(gl, file) {
           const text = event.target.result;
           const obj = parseOBJ(text);
 
-          if (!initialMaterials) {
-              reject(new Error("Initial materials are not loaded."));
-              return;
-          }
+          // Create a new material with default values or values extracted from the file
+          const newMaterial = {
+              diffuse: [1, 1, 1],
+              ambient: [0.1, 0.1, 0.1],
+              emissive: [0, 0, 0],
+              specular: [1, 1, 1],
+              shininess: 50,
+              opacity: 1,
+              diffuseMap: null, // Set this to the texture if available
+          };
 
-          // Apply the initial materials to the uploaded model
+          // Load the texture
+          const texture = await loadTexture(gl, '../data/mickeyMouse/marmo.jpg');
+          newMaterial.diffuseMap = texture;
+
+          console.log('New material:', newMaterial); // Debug logging
           const parts = obj.geometries.map(({ data }) => {
               if (!data.color) {
                   data.color = { value: [1, 1, 1, 1] }; // Default to white
               }
               const bufferInfo = webglUtils.createBufferInfoFromArrays(gl, data);
+              const material = {
+                  ...defaultMaterial,
+                  ...newMaterial, // Apply the new material
+              };
+              console.log('Applying material:', material); // Debug logging
               return {
-                  material: {
-                      ...defaultMaterial,
-                      ...initialMaterials.defaultMaterial, // Apply initial materials
-                  },
+                  material,
                   bufferInfo,
               };
           });
@@ -274,6 +275,48 @@ async function loadModelFromFile(gl, file) {
   });
 }
 
+// Function to load a texture
+function loadTexture(gl, url) {
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Fill the texture with a 1x1 blue pixel until the image has loaded
+  const level = 0;
+  const internalFormat = gl.RGBA;
+  const width = 1;
+  const height = 1;
+  const border = 0;
+  const srcFormat = gl.RGBA;
+  const srcType = gl.UNSIGNED_BYTE;
+  const pixel = new Uint8Array([0, 0, 255, 255]); // blue
+  gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, border, srcFormat, srcType, pixel);
+
+  // Asynchronously load the image
+  const image = new Image();
+  image.src = url;
+  image.onload = function() {
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, image);
+
+    // Check if the image is a power of 2 in both dimensions
+    if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+      // Generate mipmaps
+      gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+      // Turn off mipmaps and set wrapping to clamp to edge
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    }
+  };
+
+  return texture;
+}
+
+// Utility function to check if a number is a power of 2
+function isPowerOf2(value) {
+  return (value & (value - 1)) == 0;
+}
 
 document.getElementById('fileInput').addEventListener('change', async (event) => {
   const feedback = document.getElementById('feedback');
@@ -292,10 +335,6 @@ document.getElementById('fileInput').addEventListener('change', async (event) =>
       feedback.textContent = "Invalid file type. Please upload a .obj file.";
   }
 });
-
-
-
-
 
 function getRayFromMouse(mouseX, mouseY) {
     const rect = gl.canvas.getBoundingClientRect();
