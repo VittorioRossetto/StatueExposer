@@ -198,4 +198,46 @@ function setGeometry(gl) {
   gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
 }
 
+function loadCubeMap(gl, urls) {
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+
+  const faceInfos = [
+    { target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, url: urls.px },
+    { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X, url: urls.nx },
+    { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y, url: urls.py },
+    { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, url: urls.ny },
+    { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z, url: urls.pz },
+    { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, url: urls.nz },
+  ];
+
+  faceInfos.forEach((faceInfo) => {
+    const { target, url } = faceInfo;
+    const level = 0;
+    const internalFormat = gl.RGBA;
+    const width = 1024;
+    const height = 1024;
+    const format = gl.RGBA;
+    const type = gl.UNSIGNED_BYTE;
+
+    // Setup each face so it's immediately renderable
+    gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
+
+    // Asynchronously load an image
+    const image = new Image();
+    image.src = url;
+    image.addEventListener('load', function() {
+      // Now that the image has loaded, copy it to the texture
+      gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+      gl.texImage2D(target, level, internalFormat, format, type, image);
+      gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+    });
+  });
+
+  gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+
+  return texture;
+}
+
 main();

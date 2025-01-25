@@ -184,3 +184,36 @@ canvas.addEventListener('touchmove', (event) => {
 canvas.addEventListener('touchend', () => {
   isDragging = false;
 });
+
+function getRayFromMouse(mouseX, mouseY) {
+  const rect = gl.canvas.getBoundingClientRect();
+  console.log(rect.right);
+  console.log(rect.left);
+  const x = mouseX - rect.left;
+  const y = mouseY - rect.top;
+  const clipSpace = [
+    (x / rect.width) * 2 - 1,
+    (y / rect.height) * -2 + 1,
+    -1, 1
+  ];
+
+  const inverseProjection = m4.inverse(projection);
+  const inverseView = m4.inverse(viewMatrixMain);
+  const invProjViewMatrix = m4.multiply(inverseProjection, inverseView);
+
+  const rayClip = m4.transformPoint(invProjViewMatrix, clipSpace);
+  let rayOrigin = [invProjViewMatrix[12], invProjViewMatrix[13], invProjViewMatrix[14]];
+  let rayDirection = m4.normalize(m4.subtractVectors(rayClip, rayOrigin));
+
+  return {
+    origin: rayOrigin,
+    direction: rayDirection
+  };
+}
+
+gl.canvas.addEventListener('click', (event) => {
+  const ray = getRayFromMouse(event.clientX, event.clientY);
+  frontLightX = ray.origin[0] + ray.direction[0];
+  frontLightY = ray.origin[1] + ray.direction[1];
+  frontLightZ = ray.origin[2] + ray.direction[2];
+});
