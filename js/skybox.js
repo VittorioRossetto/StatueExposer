@@ -34,27 +34,27 @@ function main() {
 const faceInfos = [
     {
       target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-      url: '../data/skybox/px.png',
+      url: '../data/skybox/px.jpg',
     },
     {
       target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-      url: '../data/skybox/nx.png',
+      url: '../data/skybox/nx.jpg',
     },
     {
       target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-      url: '../data/skybox/py.png',
+      url: '../data/skybox/py.jpg',
     },
     {
       target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-      url: '../data/skybox/ny.png',
+      url: '../data/skybox/ny.jpg',
     },
     {
       target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-      url: '../data/skybox/pz.png',
+      url: '../data/skybox/pz.jpg',
     },
     {
       target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-      url: '../data/skybox/nz.png',
+      url: '../data/skybox/nz.jpg',
     },
   ];
 

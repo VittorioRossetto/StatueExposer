@@ -28,6 +28,10 @@ var mirrorY = 1;
 var mirrorZ = 1;
 
 var cubeMapTexture;
+var statueTexture;
+
+var horizzontal = false;
+var statueOrientation = 0; // Statue statueOrientation variable
 
 async function main() {
   // compiles and links the shaders, looks up attribute and uniform locations
@@ -40,6 +44,9 @@ async function main() {
   // Load the model pedestal
   const objHref_pedestal = '../data/pedestal/pedestal.obj';
   model_pedestal = await loadModel(gl, objHref_pedestal);
+
+  // Load the default texture for the statue
+  statueTexture = createTexture(gl, '../data/mickeyMouse/marmo.jpg');
 
   // Load the texture for the pedestal
   const pedestalTexture = createTexture(gl, '../data/pedestal/marmo_rosa.jpg');
@@ -76,17 +83,14 @@ async function main() {
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
     projection = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
 
-    // Animate the rotation
-    //modelYRotationRadians1 += 0.7 * deltaTime;
-    //modelXRotationRadians1 += 0.4 * (1 * deltaTime);
-
     // compute the world matrix
     let u_world = m4.identity();
     u_world = m4.translate(u_world_statue, ...model_statue.objOffset);
     u_world = rotateObject([0, 0, 0], u_world)
     u_world = moveObject([0, 220, -5], u_world);
     u_world = m4.xRotate(u_world, modelXRotationRadians);
-    u_world = m4.yRotate(u_world, modelYRotationRadians);
+    u_world = m4.yRotate(u_world, modelZRotationRadians);
+    u_world = m4.zRotate(u_world, -modelYRotationRadians);
 
     // Compute the world matrix for the pedestal
     let u_world_pedestal = m4.identity();
@@ -94,8 +98,15 @@ async function main() {
     u_world_pedestal = rotateObject([Math.PI/2, 0, 0], u_world_pedestal);
     u_world_pedestal = m4.xRotate(u_world_pedestal, Math.PI / 2); // Rotate 90 degrees upwards
     u_world_pedestal = m4.scale(u_world_pedestal, 10, 10, 10); // Scale the pedestal to make it bigger
-    u_world_pedestal = m4.xRotate(u_world_pedestal, modelXRotationRadians);
-    u_world_pedestal = m4.zRotate(u_world_pedestal, -modelYRotationRadians);
+    //u_world_pedestal = m4.xRotate(u_world_pedestal, modelXRotationRadians);
+    if(statueOrientation <= 1) {
+      u_world_pedestal = m4.zRotate(u_world_pedestal, -modelYRotationRadians);
+      u_world_pedestal = m4.zRotate(u_world_pedestal, -modelZRotationRadians);
+    } else {
+      u_world_pedestal = m4.zRotate(u_world_pedestal, modelYRotationRadians);
+      u_world_pedestal = m4.zRotate(u_world_pedestal, modelZRotationRadians);
+    }
+    
 
     var sharedUniforms;
     viewMatrixMain = m4.inverse(u_world);
@@ -116,12 +127,13 @@ async function main() {
 
     // Extract statue position from u_world matrix
     let statuetPosition = {
-      x: u_world[12], 
+      x: u_world[12],
       y: u_world[13],
-      z: u_world[14]};
+      z: u_world[14]
+    };
 
     gl.useProgram(meshProgramInfo.program);
-      
+
     // Set the shadow uniform
     gl.uniform1i(gl.getUniformLocation(meshProgramInfo.program, 'u_shadow'), shadow ? 1 : 0);
 
@@ -136,15 +148,18 @@ async function main() {
     // calls gl.uniform
     webglUtils.setUniforms(meshProgramInfo, sharedUniforms);
 
+    // Bind the statue texture to texture unit 0
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, statueTexture);
+    gl.uniform1i(gl.getUniformLocation(meshProgramInfo.program, 'diffuseMap'), 0);
+
     renderGenericModel(u_world, model_statue, meshProgramInfo);
 
     // Render the pedestal
     renderGenericModel(u_world_pedestal, model_pedestal, meshProgramInfo);
 
     requestAnimationFrame(render);
-    updateCameraPosition();
   }
-
   requestAnimationFrame(render);
 }
 
@@ -315,64 +330,5 @@ async function loadModelFromFile(gl, file) {
     reader.readAsText(file);
   });
 }
-
-document.getElementById('fileInput').addEventListener('change', async (event) => {
-  const feedback = document.getElementById('feedback');
-  const file = event.target.files[0];
-  if (file && file.name.endsWith('.obj')) {
-    feedback.textContent = "Loading...";
-    try {
-      const userModel = await loadModelFromFile(gl, file);
-      model_statue = userModel;
-      feedback.textContent = "Model loaded successfully!";
-    } catch (err) {
-      feedback.textContent = "Error loading model. Please try again.";
-      console.error(err);
-    }
-  } else {
-    feedback.textContent = "Invalid file type. Please upload a .obj file.";
-  }
-});
-
-document.getElementById('rotateX').addEventListener('click', () => {
-  modelXRotationRadians += Math.PI / 2;
-});
-
-document.getElementById('rotateY').addEventListener('click', () => {
-  modelYRotationRadians += Math.PI / 2;
-});
-
-function getRayFromMouse(mouseX, mouseY) {
-  const rect = gl.canvas.getBoundingClientRect();
-  console.log(rect.right);
-  console.log(rect.left);
-  const x = mouseX - rect.left;
-  const y = mouseY - rect.top;
-  const clipSpace = [
-    (x / rect.width) * 2 - 1,
-    (y / rect.height) * -2 + 1,
-    -1, 1
-  ];
-
-  const inverseProjection = m4.inverse(projection);
-  const inverseView = m4.inverse(viewMatrixMain);
-  const invProjViewMatrix = m4.multiply(inverseProjection, inverseView);
-
-  const rayClip = m4.transformPoint(invProjViewMatrix, clipSpace);
-  let rayOrigin = [invProjViewMatrix[12], invProjViewMatrix[13], invProjViewMatrix[14]];
-  let rayDirection = m4.normalize(m4.subtractVectors(rayClip, rayOrigin));
-
-  return {
-    origin: rayOrigin,
-    direction: rayDirection
-  };
-}
-
-gl.canvas.addEventListener('click', (event) => {
-  const ray = getRayFromMouse(event.clientX, event.clientY);
-  frontLightX = ray.origin[0] + ray.direction[0];
-  frontLightY = ray.origin[1] + ray.direction[1];
-  frontLightZ = ray.origin[2] + ray.direction[2];
-});
 
 main();

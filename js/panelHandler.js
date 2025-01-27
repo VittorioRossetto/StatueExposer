@@ -69,3 +69,79 @@ document.getElementById('ShadowButton').addEventListener('click', () => {
     const shadowButton = document.getElementById('ShadowButton');
     shadowButton.textContent = shadow ? 'Disable Shininess' : 'Enable Shininess';
 });
+
+document.getElementById('fileInput').addEventListener('change', async (event) => {
+    const feedback = document.getElementById('feedback');
+    const file = event.target.files[0];
+    if (file && file.name.endsWith('.obj')) {
+      feedback.textContent = "Loading...";
+      try {
+        const userModel = await loadModelFromFile(gl, file);
+        model_statue = userModel;
+        feedback.textContent = "Model loaded successfully!";
+      } catch (err) {
+        feedback.textContent = "Error loading model. Please try again.";
+        console.error(err);
+      }
+    } else {
+      feedback.textContent = "Invalid file type. Please upload a .obj file.";
+    }
+  });
+  
+  document.getElementById('textureInput').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file && file.type === 'image/jpeg') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const image = new Image();
+        image.onload = () => {
+          console.log('Texture loaded:', image);
+          statueTexture = createTexture(gl, image);
+  
+          // Create a new material with the uploaded texture
+          const newMaterial = {
+            diffuse: [1, 1, 1],
+            ambient: [0.1, 0.1, 0.1],
+            emissive: [0, 0, 0],
+            specular: [1, 1, 1],
+            shininess: 50,
+            opacity: 1,
+            diffuseMap: statueTexture,
+          };
+  
+          // Apply the new material to the model parts
+          model_statue.parts.forEach(part => {
+            part.material = {
+              ...defaultMaterial,
+              ...newMaterial,
+            };
+          });
+        };
+        image.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+  
+  document.getElementById('rotateX').addEventListener('click', () => {
+    // Reset rotations
+    modelYRotationRadians = degToRad(0);
+    modelZRotationRadians = degToRad(0);
+  
+    // Apply new rotation
+    modelXRotationRadians += Math.PI / 2;
+    horizzontal = !horizzontal;
+    if(statueOrientation < 3) statueOrientation += 1;
+    else statueOrientation = 0;
+    console.log(statueOrientation)
+  });
+  
+  document.getElementById('rotateY').addEventListener('click', () => {
+    // Reset rotations
+    modelXRotationRadians = degToRad(0);
+    modelYRotationRadians = degToRad(0);
+    modelZRotationRadians = degToRad(0);
+  
+    // Apply new rotation
+    modelYRotationRadians += Math.PI / 2;
+  });
