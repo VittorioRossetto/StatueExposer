@@ -81,7 +81,7 @@ async function main() {
     let u_world = m4.identity();
     u_world = m4.translate(u_world_statue, ...model_statue.objOffset);
     u_world = rotateObject([0, 0, 0], u_world)
-    u_world = moveObject([0, 220, 0], u_world);
+    u_world = moveObject([0, 222.5, 0], u_world);
     u_world = m4.xRotate(u_world, modelXRotationRadians);
     u_world = m4.yRotate(u_world, modelZRotationRadians);
     u_world = m4.zRotate(u_world, -modelYRotationRadians);
