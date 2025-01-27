@@ -25,7 +25,7 @@
                 position: absolute;
                 top: 10px;
                 left: 10px;
-                background: rgba(255, 255, 255, 0.9); /* Slightly more opaque */
+                background: rgba(255, 255, 255, 0.7); /* Slightly more opaque */
                 padding: 15px; /* Increased padding */
                 border-radius: 8px; /* Slightly more rounded corners */
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
@@ -34,6 +34,37 @@
                 font-size: 14px; /* Slightly larger font size */
                 color: #333; /* Darker text color */
             }
+
+            /* General styling for file input elements */
+            input[type="file"] {
+            display: none; /* Hide the default input */
+            }
+
+            /* Custom file input styling */
+            #file-input-label, #texture-input-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007BFF; /* Green background */
+            color: #fff; /* White text */
+            font-size: 16px;
+            border-radius: 8px; /* Rounded corners */
+            cursor: pointer; /* Pointer cursor on hover */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 10px;
+            }
+
+            /* Hover effect */
+            #file-input-label:hover, #texture-input-label:hover {
+            background-color: #45a049;
+            transform: scale(1.05); /* Slightly enlarge on hover */
+            }
+
+            /* Focus effect */
+            #file-input-label:focus, #texture-input-label:focus {
+            outline: 3px solid #80c683; /* Accessible focus ring */
+            }
+
+            
 
             button {
                 margin-top: 10px;
@@ -44,10 +75,12 @@
                 color: white;
                 font-size: 14px;
                 cursor: pointer;
+                transition: background-color 0.3s ease, transform 0.2s ease;
             }
 
-            #resetViewButton:hover, #togglePanelButton:hover, #ShadowButton:hover {
+            button:hover {
                 background-color: #0056b3;
+                transform: scale(1.05); /* Slightly enlarge on hover */
             }
             #togglePanelButton {
                 position: absolute;
@@ -69,12 +102,17 @@
         <!-- We add a little paragraph explaining that the view can be modified with keyboard -->
         <p>You can also use the W A S D keys and up down arrow keys to move the camera</p>
         <button id="resetViewButton">Reset View</button>
+        <button id="resetPositionButton">Reset Position</button><br>
         <button id="ShadowButton">Disable Shininess</button>
         <button id="rotateX">Rotate 90° X</button>
         <button id="rotateY">Rotate 90° Y</button><br>
-        <button id="toggleReflective">Toggle Reflective</button>
-        <input type="file" id="fileInput" accept=".obj">
-        <input type="file" id="textureInput" accept=".jpg">
+        <div class="file-input-container">
+            <label id="file-input-label" for="fileInput">Upload .OBJ File</label>
+            <input type="file" id="fileInput" accept=".obj">
+            
+            <label id="texture-input-label" for="textureInput">Upload Texture (.JPG)</label>
+            <input type="file" id="textureInput" accept=".jpg">
+          </div>
         <div id="feedback"></div>
     </div>
     <button id="togglePanelButton">Option Panel</button>

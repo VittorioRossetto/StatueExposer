@@ -61,6 +61,13 @@ document.getElementById('resetViewButton').addEventListener('click', () => {
     fovInput.value = 60; // Default FOV in degrees
 });
 
+document.getElementById('resetPositionButton').addEventListener('click', () => {
+    modelXRotationRadians = degToRad(0);
+    modelYRotationRadians = degToRad(0);
+    modelZRotationRadians = degToRad(0);
+    statueOrientation = 0;
+})
+
 document.getElementById('ShadowButton').addEventListener('click', () => {
     // Toggle the shadow effect
     shadow = !shadow;
@@ -137,11 +144,6 @@ document.getElementById('fileInput').addEventListener('change', async (event) =>
   });
   
   document.getElementById('rotateY').addEventListener('click', () => {
-    // Reset rotations
-    modelXRotationRadians = degToRad(0);
-    modelYRotationRadians = degToRad(0);
-    modelZRotationRadians = degToRad(0);
-  
     // Apply new rotation
     modelYRotationRadians += Math.PI / 2;
   });
