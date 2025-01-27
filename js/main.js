@@ -42,7 +42,7 @@ async function main() {
   model_statue = await loadModel(gl, objHref_statue);
 
   // Load the model pedestal
-  const objHref_pedestal = '../data/pedestal/pedestal.obj';
+  const objHref_pedestal = '../data/pedestal/PedestalText.obj';
   model_pedestal = await loadModel(gl, objHref_pedestal);
 
   // Load the default texture for the statue
