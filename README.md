@@ -12,37 +12,41 @@ This project is a feature-rich WebGL-based 3D viewer that allows users to load, 
 - Model rotation using touch gestures or control panel buttons.
 - Interactive user interface for uploading custom models and textures.
 
+
 ## Folder Structure
 
 ```
-.vscode/ 
-    settings.json  # Editor configuration
+.vscode/
+    settings.json         # Editor configuration
 
-data/ 
-    mickeyMouse/   # Example 3D model assets 
-    pedestal/      # Custom pedestal model with text "Statue Exposer" 
-    skybox/        # Environment texture files for creating the skybox
+data/
+    mickeyMouse/          # Example 3D model assets
+    pedestal/             # Custom pedestal model with text "Statue Exposer"
+    skybox/               # Environment texture files for creating the skybox
 
-js/ 
-    # Core JavaScript files for application functionality 
-    main.js        # Entry point 
-    shaders.js     # Shaders for rendering 
-    skybox.js      # Skybox creation 
-    ...            # Additional utility files
+js/                      # Core JavaScript files for application functionality
+    main.js               # Entry point
+    shaders.js            # Shaders for rendering
+    skybox.js             # Skybox creation
+    ...                   # Additional utility files
 
-resources/ 
-    # Supporting libraries 
-    statueExposer.html  # Main HTML file
+resources/               # Supporting libraries
+statueExposer.html        # Main HTML file
 ```
 
 ## How to Use
 
-1. Open `statueExposer.html` in a modern web browser with WebGL support.
-2. Use the control panel and keyboard for interaction:
-     - **Sliders**: Adjust field of view and camera position.
-     - **Keyboard**: Move the camera with `W`, `A`, `S`, `D`, and arrow keys.
-     - **Gestures**: Rotate the model using touch or mouse.
-     - **File Inputs**: Upload new `.OBJ` models or textures.
+1. **Install a local server:** The program won't work by simply opening `statueExposer.html` directly in a web browser. You must use a local server, such as the [Live Server extension for VSCode](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer).
+   
+2. **Run the project:**
+   - Open the project folder in VSCode.
+   - Right-click `statueExposer.html` and select **Open with Live Server**.
+
+3. **Interact with the viewer:**
+   - **Sliders:** Adjust field of view and camera position.
+   - **Keyboard:** Move the camera with `W`, `A`, `S`, `D`, and `↑`, `↓`, `←`, `→` keys.
+   - **Gestures:** Rotate the model using touch or mouse.
+   - **File Inputs:** Upload new `.OBJ` models or textures.
 
 ## Modeling the Pedestal
 
