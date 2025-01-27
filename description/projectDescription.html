@@ -103,7 +103,7 @@ data/
         px.jpg          # Positive X-axis texture
         py.jpg          # Positive Y-axis texture
         pz.jpg          # Positive Z-axis texture
-        
+
 js/                      # Core JavaScript files for application functionality
     generalUtils.js       # Helper functions for common tasks
     keyHandler.js         # Manages keyboard input for interactivity
@@ -196,6 +196,22 @@ statueExposer.html        # Main HTML file that initializes the 3D viewer
         <p>
             The <strong>shaders.js</strong> file defines the vertex and fragment shaders that power the rendering process. These shaders handle various graphical tasks such as lighting calculations, texture mapping, and environment mapping. The use of shaders enables realistic rendering effects by performing complex calculations directly on the GPU.
         </p>
+
+        <h2>Modeling the Pedestal</h2>
+        <p>
+            The pedestal for this project was custom-designed to include the text "Statue Exposer" on its front face. This was achieved using Blender, a popular 3D modeling software. The steps involved:
+        </p>
+        <ol>
+            <li>Creating a basic pedestal shape using primitive shapes like cubes and cylinders.</li>
+            <li>Adding the "Statue Exposer" text as a 3D object in Blender and positioning it on the front face of the pedestal.</li>
+            <li>Using Boolean operations to merge the text into the pedestal geometry, ensuring seamless integration.</li>
+            <li>Exporting the completed pedestal model in <strong>.OBJ</strong> format.</li>
+        </ol>
+        <div class="image-container">
+            <img src="blenderScreenshot.png" alt="Modeling the pedestal with text in Blender">
+            <p class="image-caption">Figure 4: The pedestal model in Blender with the "Statue Exposer" text integrated.</p>
+        </div>
+
 
         <h2>Conclusion</h2>
         <p>

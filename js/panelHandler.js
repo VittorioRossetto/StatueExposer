@@ -137,7 +137,6 @@ document.getElementById('fileInput').addEventListener('change', async (event) =>
   
     // Apply new rotation
     modelXRotationRadians += Math.PI / 2;
-    horizzontal = !horizzontal;
     if(statueOrientation < 3) statueOrientation += 1;
     else statueOrientation = 0;
     console.log(statueOrientation)

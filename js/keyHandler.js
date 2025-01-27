@@ -124,21 +124,6 @@ canvas.addEventListener('mousemove', (event) => {
       let deltaX = event.clientX - lastX;
       let deltaY = event.clientY - lastY;
 
-      //console.log("The statue is horizzontal:" + horizzontal)
-      /*if(horizzontal) {
-        if (deltaX > 0) {
-          modelZRotationRadians += rotationSpeed;
-        } else if (deltaX < 0) {
-            modelZRotationRadians -= rotationSpeed;
-        }
-      } else {
-        if (deltaX > 0) {
-          modelYRotationRadians += rotationSpeed;
-        } else if (deltaX < 0) {
-          modelYRotationRadians -= rotationSpeed;
-        }
-      }*/
-
       switch(statueOrientation)
       {
         case 0:

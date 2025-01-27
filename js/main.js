@@ -14,7 +14,6 @@ let frontLightZ = -1;
 
 var u_world_statue = m4.identity();
 
-var model_portrait;
 var model_statue;
 var model_pedestal;
 
@@ -27,11 +26,9 @@ var mirrorX = 1;
 var mirrorY = 1;
 var mirrorZ = 1;
 
-var cubeMapTexture;
 var statueTexture;
 
-var horizzontal = false;
-var statueOrientation = 0; // Statue statueOrientation variable
+var statueOrientation = 0; // Variable to keep track of the orientation of the statue
 
 async function main() {
   // compiles and links the shaders, looks up attribute and uniform locations
@@ -61,9 +58,6 @@ async function main() {
   const zNear = 0.1;
   const zFar = 2000;
 
-  var modelXRotationRadians2 = degToRad(0);
-  var modelYRotationRadians2 = degToRad(0);
-
   // Get the starting time.
   var then = 0;
 
@@ -87,7 +81,7 @@ async function main() {
     let u_world = m4.identity();
     u_world = m4.translate(u_world_statue, ...model_statue.objOffset);
     u_world = rotateObject([0, 0, 0], u_world)
-    u_world = moveObject([0, 220, -5], u_world);
+    u_world = moveObject([0, 220, 0], u_world);
     u_world = m4.xRotate(u_world, modelXRotationRadians);
     u_world = m4.yRotate(u_world, modelZRotationRadians);
     u_world = m4.zRotate(u_world, -modelYRotationRadians);
