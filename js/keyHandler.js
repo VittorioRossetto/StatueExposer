@@ -1,13 +1,17 @@
+/*
+* Key handler
+*/
+
 // Initialize an object to keep track of the pressed state of various keys
 var keys = [];
-// Initialize to keep track of object dragging
+// Initialize a flag to track whether the user is dragging the mouse/touch
 let isDragging = false;
 
 // Function to handle keydown events
 function handleKeyDown(event) {
-    console.log(event.key);
-    if(keys != undefined) {
-        console.log('keys is not undefined');
+    console.log(event.key); // Log the key pressed
+    if (keys != undefined) {
+        console.log('keys is not undefined'); // Debugging log
         const key = event.key.toLowerCase(); // Get the key pressed and convert it to lowercase
         keys[key] = true; // Set the corresponding key in the keys object to true
         updateCameraPosition(); // Update the camera position based on the current keys pressed
@@ -16,154 +20,110 @@ function handleKeyDown(event) {
 
 // Function to handle keyup events
 function handleKeyUp(event) {
-  if(keys != undefined) {
-    const key = event.key.toLowerCase(); // Get the key released and convert it to lowercase
-    keys[key] = false; // Set the corresponding key in the keys object to false
-    updateCameraPosition(); // Update the camera position based on the current keys pressed
-  }
+    if (keys != undefined) {
+        const key = event.key.toLowerCase(); // Get the key released and convert it to lowercase
+        keys[key] = false; // Set the corresponding key in the keys object to false
+        updateCameraPosition(); // Update the camera position based on the current keys pressed
+    }
 }
-
-/* Add event listeners to all elements with the class "arrow-key"
-document.querySelectorAll(".arrow-key").forEach(function(button) {
-    const keyCode = button.getAttribute("data-key"); // Get the key associated with the button
-
-    // Add event listener for mousedown event
-    button.addEventListener("mousedown", function(e) {
-        keys[keyCode] = true; // Set the corresponding key in the keys object to true
-        updateCameraPosition(); // Update the camera position based on the current keys pressed
-    });
-
-    // Add event listener for mouseup event
-    button.addEventListener("mouseup", function(e) {
-        keys[keyCode] = false; // Set the corresponding key in the keys object to false
-        updateCameraPosition(); // Update the camera position based on the current keys pressed
-    });
-
-    // Add event listener for mouseout event
-    button.addEventListener("mouseout", function(e) {
-        keys[keyCode] = false; // Set the corresponding key in the keys object to false
-        updateCameraPosition(); // Update the camera position based on the current keys pressed
-    });
-}); */
 
 // Add event listeners for keydown and keyup events on the window
 window.addEventListener('keydown', handleKeyDown);
 window.addEventListener('keyup', handleKeyUp);
 
+// Function to update the camera position based on the keys pressed
 function updateCameraPosition() {
-    if(keys != undefined){
-      if (keys['w']) {
-        m4.translate(cameraPositionMain, 0, 0, -cameraSpeed, cameraPositionMain);
-        ////m4.translate(u_world_rocket, 0, 0, -cameraSpeed, u_world_rocket);
-      }
-      if (keys['a']) {
-        m4.translate(cameraPositionMain, -cameraSpeed, 0, 0, cameraPositionMain);
-        //m4.translate(u_world_rocket, -cameraSpeed, 0, 0, u_world_rocket);
-      }
-      if (keys['s']) {
-        console.log('pressed s');
-        m4.translate(cameraPositionMain, 0, 0, cameraSpeed, cameraPositionMain);
-        //m4.translate(u_world_rocket, 0, 0, cameraSpeed, u_world_rocket);
-      }
-      if (keys['d']) {
-        m4.translate(cameraPositionMain, cameraSpeed, 0, 0, cameraPositionMain);
-        //m4.translate(u_world_rocket, cameraSpeed, 0, 0, u_world_rocket);
-      }
-      if (keys['ArrowUp']) {
-          m4.translate(cameraPositionMain, 0, cameraSpeed, 0, cameraPositionMain);
-          //m4.translate(u_world_rocket, 0, cameraSpeed, 0, u_world_rocket);
-      }
-      if (keys['ArrowDown']) {
-          m4.translate(cameraPositionMain, 0, -cameraSpeed, 0, cameraPositionMain);
-          //m4.translate(u_world_rocket, 0, -cameraSpeed, 0, u_world_rocket);
-      }
-      if (keys['ArrowLeft']) {
-          m4.yRotate(cameraPositionMain, degToRad(0.3), cameraPositionMain);
-          //m4.yRotate(u_world_rocket, degToRad(0.3), u_world_rocket);
-          m4.translate(cameraPositionMain, 0.027, 0, 0, cameraPositionMain);
-      }
-      if (keys['ArrowRight']) {
-          m4.yRotate(cameraPositionMain, degToRad(-0.3), cameraPositionMain);
-          //m4.yRotate(u_world_rocket, degToRad(-0.3), u_world_rocket);
-          m4.translate(cameraPositionMain, -0.027, 0, 0, cameraPositionMain);
-      }
-      if (keys['arrowup']) {
-        m4.translate(cameraPositionMain, 0, cameraSpeed, 0, cameraPositionMain);
-        //m4.translate(u_world_rocket, 0, cameraSpeed, 0, u_world_rocket);
-      }
-      if (keys['arrowdown']) {
-        m4.translate(cameraPositionMain, 0, -cameraSpeed, 0, cameraPositionMain);
-        //m4.translate(u_world_rocket, 0, -cameraSpeed, 0, u_world_rocket);
-      }
-      if (keys['arrowleft']) {
-        m4.yRotate(cameraPositionMain, degToRad(0.3), cameraPositionMain);
-        //m4.yRotate(u_world_rocket, degToRad(0.3), u_world_rocket);
-        m4.translate(cameraPositionMain, 0.027, 0, 0, cameraPositionMain);
-      }
-      if (keys['arrowright']) {
-        m4.yRotate(cameraPositionMain, degToRad(-0.3), cameraPositionMain);
-        //m4.yRotate(u_world_rocket, degToRad(-0.3), u_world_rocket);
-        m4.translate(cameraPositionMain, -0.027, 0, 0, cameraPositionMain);
-      }
-      if (keys['l']) {
-        //we log the current position of the camera
-        console.log(cameraPositionMain[12], cameraPositionMain[13], cameraPositionMain[14]);
-      }
+    if (keys != undefined) {
+        // Move the camera forward (negative Z direction) when 'w' is pressed
+        if (keys['w']) {
+            m4.translate(cameraPositionMain, 0, 0, -cameraSpeed, cameraPositionMain);
+        }
+        // Move the camera left (negative X direction) when 'a' is pressed
+        if (keys['a']) {
+            m4.translate(cameraPositionMain, -cameraSpeed, 0, 0, cameraPositionMain);
+        }
+        // Move the camera backward (positive Z direction) when 's' is pressed
+        if (keys['s']) {
+            console.log('pressed s'); // Debugging log
+            m4.translate(cameraPositionMain, 0, 0, cameraSpeed, cameraPositionMain);
+        }
+        // Move the camera right (positive X direction) when 'd' is pressed
+        if (keys['d']) {
+            m4.translate(cameraPositionMain, cameraSpeed, 0, 0, cameraPositionMain);
+        }
+        // Move the camera up (positive Y direction) when 'ArrowUp' is pressed
+        if (keys['ArrowUp']) {
+            m4.translate(cameraPositionMain, 0, cameraSpeed, 0, cameraPositionMain);
+        }
+        // Move the camera down (negative Y direction) when 'ArrowDown' is pressed
+        if (keys['ArrowDown']) {
+            m4.translate(cameraPositionMain, 0, -cameraSpeed, 0, cameraPositionMain);
+        }
+        // Rotate the camera left (around the Y-axis) when 'ArrowLeft' is pressed
+        if (keys['ArrowLeft']) {
+            m4.yRotate(cameraPositionMain, degToRad(0.3), cameraPositionMain);
+            m4.translate(cameraPositionMain, 0.027, 0, 0, cameraPositionMain);
+        }
+        // Rotate the camera right (around the Y-axis) when 'ArrowRight' is pressed
+        if (keys['ArrowRight']) {
+            m4.yRotate(cameraPositionMain, degToRad(-0.3), cameraPositionMain);
+            m4.translate(cameraPositionMain, -0.027, 0, 0, cameraPositionMain);
+        }
+        // Log the current position of the camera when 'l' is pressed
+        if (keys['l']) {
+            console.log(cameraPositionMain[12], cameraPositionMain[13], cameraPositionMain[14]);
+        }
     }
 }
 
+/*
+* Mouse interaction
+*/
+
 // Event listeners for mouse interaction
 canvas.addEventListener('mousedown', (event) => {
-  isDragging = true;
-  lastX = event.clientX;
-  lastY = event.clientY;
+  isDragging = true; // Set the dragging flag to true
+  lastX = event.clientX; // Store the initial X position of the mouse
+  lastY = event.clientY; // Store the initial Y position of the mouse
 });
 
 canvas.addEventListener('mousemove', (event) => {
   if (isDragging) {
+      // Calculate the change in mouse position (deltaX and deltaY)
       let deltaX = event.clientX - lastX;
       let deltaY = event.clientY - lastY;
 
-      switch(statueOrientation)
-      {
-        case 0:
-          if (deltaX > 0) {
-            modelZRotationRadians += rotationSpeed;
-          } else if (deltaX < 0) {
-            modelZRotationRadians -= rotationSpeed;
-          }
-          break;
-        case 1:
-          if (deltaX > 0) {
-            modelYRotationRadians += rotationSpeed;
-          } else if (deltaX < 0) {
-            modelYRotationRadians -= rotationSpeed;
-          }
-          break;
-        case 2:
-          if (deltaX > 0) {
-            modelZRotationRadians -= rotationSpeed;
-          } else if (deltaX < 0) {
-              modelZRotationRadians += rotationSpeed;
-          }
-          break;
-        case 3:
-          if (deltaX > 0) {
-            modelYRotationRadians -= rotationSpeed;
-          } else if (deltaX < 0) {
-            modelYRotationRadians += rotationSpeed;
-          }
-          break;
+      // Adjust the model's rotation based on the statue's orientation
+      switch (statueOrientation) {
+          case 0:
+              if (deltaX > 0) {
+                  modelZRotationRadians += rotationSpeed; // Rotate around the Z-axis
+              } else if (deltaX < 0) {
+                  modelZRotationRadians -= rotationSpeed;
+              }
+              break;
+          case 1:
+              if (deltaX > 0) {
+                  modelYRotationRadians += rotationSpeed; // Rotate around the Y-axis
+              } else if (deltaX < 0) {
+                  modelYRotationRadians -= rotationSpeed;
+              }
+              break;
+          case 2:
+              if (deltaX > 0) {
+                  modelZRotationRadians -= rotationSpeed; // Reverse rotation around the Z-axis
+              } else if (deltaX < 0) {
+                  modelZRotationRadians += rotationSpeed;
+              }
+              break;
+          case 3:
+              if (deltaX > 0) {
+                  modelYRotationRadians -= rotationSpeed; // Reverse rotation around the Y-axis
+              } else if (deltaX < 0) {
+                  modelYRotationRadians += rotationSpeed;
+              }
+              break;
       }
-
-      /*if (deltaY > 0) {
-          modelXRotationRadians += rotationSpeed;
-      } else if (deltaY < 0) {
-          modelXRotationRadians -= rotationSpeed;
-      }*/
-
-      // Update the camera view matrix to look at the target object
-      //updateCamera();
 
       // Store the current mouse position for the next movement calculation
       lastX = event.clientX;
@@ -171,131 +131,107 @@ canvas.addEventListener('mousemove', (event) => {
   }
 });
 
-
 canvas.addEventListener('mouseup', () => {
-  isDragging = false;
+  isDragging = false; // Reset the dragging flag when the mouse button is released
 });
+
+/*
+* Touch interaction
+* We do the same thing as mouse interaction but with touch events to make the application mobile-friendly
+*/
 
 // Event listeners for touch interaction
 canvas.addEventListener('touchstart', (event) => {
-  isDragging = true;
-  lastX = event.touches[0].clientX;
-  lastY = event.touches[0].clientY;
+  isDragging = true; // Set the dragging flag to true
+  lastX = event.touches[0].clientX; // Store the initial X position of the touch
+  lastY = event.touches[0].clientY; // Store the initial Y position of the touch
 });
 
 canvas.addEventListener('touchmove', (event) => {
   if (isDragging) {
+      // Calculate the change in touch position (deltaX and deltaY)
       let deltaX = event.touches[0].clientX - lastX;
       let deltaY = event.touches[0].clientY - lastY;
-      
-      switch(statueOrientation)
-      {
-        case 0:
-          if (deltaX > 0) {
-            modelZRotationRadians += rotationSpeed;
-          } else if (deltaX < 0) {
-            modelZRotationRadians -= rotationSpeed;
-          }
-        case 1:
-          if (deltaX > 0) {
-            modelYRotationRadians += rotationSpeed;
-          } else if (deltaX < 0) {
-            modelYRotationRadians -= rotationSpeed;
-          }
+
+      // Adjust the model's rotation based on the statue's orientation
+      switch (statueOrientation) {
+          case 0:
+              if (deltaX > 0) {
+                  modelZRotationRadians += rotationSpeed; // Rotate around the Z-axis
+              } else if (deltaX < 0) {
+                  modelZRotationRadians -= rotationSpeed;
+              }
+              break;
+          case 1:
+              if (deltaX > 0) {
+                  modelYRotationRadians += rotationSpeed; // Rotate around the Y-axis
+              } else if (deltaX < 0) {
+                  modelYRotationRadians -= rotationSpeed;
+              }
+              break;
           case 2:
-          if (deltaX > 0) {
-            modelZRotationRadians -= rotationSpeed;
-          } else if (deltaX < 0) {
-              modelZRotationRadians += rotationSpeed;
-          }
-        case 3:
-          if (deltaX > 0) {
-            modelYRotationRadians -= rotationSpeed;
-          } else if (deltaX < 0) {
-            modelYRotationRadians += rotationSpeed;
-          }
+              if (deltaX > 0) {
+                  modelZRotationRadians -= rotationSpeed; // Reverse rotation around the Z-axis
+              } else if (deltaX < 0) {
+                  modelZRotationRadians += rotationSpeed;
+              }
+              break;
+          case 3:
+              if (deltaX > 0) {
+                  modelYRotationRadians -= rotationSpeed; // Reverse rotation around the Y-axis
+              } else if (deltaX < 0) {
+                  modelYRotationRadians += rotationSpeed;
+              }
+              break;
       }
-      
 
-      /*
-      if (deltaY > 0) {
-          modelXRotationRadians += rotationSpeed;
-      } else if (deltaY < 0) {
-          modelXRotationRadians -= rotationSpeed;
-      }*/
-
-      //updateCamera();
+      // Store the current touch position for the next movement calculation
       lastX = event.touches[0].clientX;
       lastY = event.touches[0].clientY;
   }
 });
 
 canvas.addEventListener('touchend', () => {
-  isDragging = false;
+  isDragging = false; // Reset the dragging flag when the touch ends
 });
 
+/*
+* Raycasting for light positioning
+*/
+
+// Function to calculate a ray from the mouse position in 3D space
 function getRayFromMouse(mouseX, mouseY) {
-  const rect = gl.canvas.getBoundingClientRect();
-  console.log(rect.right);
-  console.log(rect.left);
-  const x = mouseX - rect.left;
-  const y = mouseY - rect.top;
+  const rect = gl.canvas.getBoundingClientRect(); // Get the canvas's bounding rectangle
+  console.log(rect.right); // Debugging log
+  console.log(rect.left); // Debugging log
+  const x = mouseX - rect.left; // Calculate the X position relative to the canvas
+  const y = mouseY - rect.top; // Calculate the Y position relative to the canvas
   const clipSpace = [
-    (x / rect.width) * 2 - 1,
-    (y / rect.height) * -2 + 1,
-    -1, 1
+      (x / rect.width) * 2 - 1, // Convert X to clip space
+      (y / rect.height) * -2 + 1, // Convert Y to clip space
+      -1, 1
   ];
 
+  // Calculate the inverse of the projection and view matrices
   const inverseProjection = m4.inverse(projection);
   const inverseView = m4.inverse(viewMatrixMain);
   const invProjViewMatrix = m4.multiply(inverseProjection, inverseView);
 
+  // Transform the clip space coordinates to world space
   const rayClip = m4.transformPoint(invProjViewMatrix, clipSpace);
-  let rayOrigin = [invProjViewMatrix[12], invProjViewMatrix[13], invProjViewMatrix[14]];
-  let rayDirection = m4.normalize(m4.subtractVectors(rayClip, rayOrigin));
+  let rayOrigin = [invProjViewMatrix[12], invProjViewMatrix[13], invProjViewMatrix[14]]; // Extract the camera position
+  let rayDirection = m4.normalize(m4.subtractVectors(rayClip, rayOrigin)); // Calculate the ray direction
 
   return {
-    origin: rayOrigin,
-    direction: rayDirection
+      origin: rayOrigin, // The origin of the ray (camera position)
+      direction: rayDirection // The direction of the ray
   };
 }
 
+// Event listener for clicking on the canvas
 gl.canvas.addEventListener('click', (event) => {
-  const ray = getRayFromMouse(event.clientX, event.clientY);
-  frontLightX = ray.origin[0] + ray.direction[0];
-  frontLightY = ray.origin[1] + ray.direction[1];
-  frontLightZ = ray.origin[2] + ray.direction[2];
-});
-
-function getRayFromMouse(mouseX, mouseY) {
-  const rect = gl.canvas.getBoundingClientRect();
-  console.log(rect.right);
-  console.log(rect.left);
-  const x = mouseX - rect.left;
-  const y = mouseY - rect.top;
-  const clipSpace = [
-    (x / rect.width) * 2 - 1,
-    (y / rect.height) * -2 + 1,
-    -1, 1
-  ];
-
-  const inverseProjection = m4.inverse(projection);
-  const inverseView = m4.inverse(viewMatrixMain);
-  const invProjViewMatrix = m4.multiply(inverseProjection, inverseView);
-
-  const rayClip = m4.transformPoint(invProjViewMatrix, clipSpace);
-  let rayOrigin = [invProjViewMatrix[12], invProjViewMatrix[13], invProjViewMatrix[14]];
-  let rayDirection = m4.normalize(m4.subtractVectors(rayClip, rayOrigin));
-
-  return {
-    origin: rayOrigin,
-    direction: rayDirection
-  };
-}
-
-gl.canvas.addEventListener('click', (event) => {
-  const ray = getRayFromMouse(event.clientX, event.clientY);
-  frontLightX = ray.origin[0] + ray.direction[0];
-  frontLightY = ray.origin[1] + ray.direction[1];
-  frontLightZ = ray.origin[2] + ray.direction[2];
+  const ray = getRayFromMouse(event.clientX, event.clientY); // Get the ray from the mouse click
+  frontLightX = ray.origin[0] + ray.direction[0]; // Update the light's X position
+  frontLightY = ray.origin[1] + ray.direction[1]; // Update the light's Y position
+  frontLightZ = ray.origin[2] + ray.direction[2]; // Update the light's Z position
 });

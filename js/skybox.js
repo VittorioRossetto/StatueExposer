@@ -1,9 +1,7 @@
 "use strict";
 
 /*
-  This Skybox script was created by modifying code from WebGL Fundamentals. 
-  To create a cube map, I used a panoramic image of the galaxy from the NASA website and converted it using the following website: https://jaxry.github.io/panorama-to-cubemap/. 
-  This tool provided the six texture images I needed.
+  This Skybox script was created by modifying code from WebGL Fundamentals. The original code can be found at: https://webglfundamentals.org/webgl/lessons/webgl-skybox.html
 */
 
 function main() {
@@ -85,18 +83,12 @@ const faceInfos = [
   gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
   gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
-  function radToDeg(r) {
-    return r * 180 / Math.PI;
-  }
-
   function degToRad(d) {
     return d * Math.PI / 180;
   }
 
   var fieldOfViewRadians = degToRad(60);
-  var cameraYRotationRadians = degToRad(0);
 
-  var spinCamera = true;
   // Capture the initial time
   var then = 0;
 
@@ -198,6 +190,9 @@ function setGeometry(gl) {
   gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
 }
 
+/*
+* DEPRECATED FUNCTION FOR LOADING CUBEMAP TEXTURES
+
 function loadCubeMap(gl, urls) {
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
@@ -239,5 +234,6 @@ function loadCubeMap(gl, urls) {
 
   return texture;
 }
+*/
 
 main();
