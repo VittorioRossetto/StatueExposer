@@ -55,7 +55,7 @@ function main() {
     return d * Math.PI / 180;
   }
 
-  var fieldOfViewRadians = degToRad(60);
+  //var fieldOfViewRadiansSB = degToRad(60);
   var then = 0;
 
   // Add a flag to control the visibility of the skybox

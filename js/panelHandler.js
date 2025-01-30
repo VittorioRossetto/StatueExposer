@@ -14,9 +14,12 @@ const fovInput = document.getElementById('fov'); // Field of View input
 const cameraXInput = document.getElementById('cameraX'); // Camera X position input
 const cameraYInput = document.getElementById('cameraY'); // Camera Y position input
 const cameraZInput = document.getElementById('cameraZ'); // Camera Z position input
-var lastX = cameraXInput.value; // Store the last X position for delta calculation
-var lastY = cameraYInput.value; // Store the last Y position for delta calculation
-var lastZ = cameraZInput.value; // Store the last Z position for delta calculation
+
+// Set initial values for lastX, lastY, and lastZ to match the initial camera position
+var lastX = 0;
+var lastY = 0;
+var lastZ = 0;
+
 var shadow = true; // Tracks the state of shadow (enabled/disabled)
 
 // Handle FOV changes
@@ -36,7 +39,7 @@ cameraXInput.addEventListener('input', () => {
   // Translate camera position based on the change from the last X value
   m4.translate(cameraPositionMain, (newX - lastX) * cameraSpeed, 0, 0, cameraPositionMain);
   lastX = newX; // Update the last X value
-  console.log('Camera X position updated:', cameraPositionMain);
+  // console.log('Camera X position updated:', cameraPositionMain);
 });
 
 // Update camera Y position and recalculate
@@ -45,7 +48,7 @@ cameraYInput.addEventListener('input', () => {
   // Translate camera position based on the change from the last Y value
   m4.translate(cameraPositionMain, 0, (newY - lastY) * cameraSpeed, 0, cameraPositionMain);
   lastY = newY; // Update the last Y value
-  console.log('Camera Y position updated:', cameraPositionMain);
+  // console.log('Camera Y position updated:', cameraPositionMain);
 });
 
 // Update camera Z position and recalculate
@@ -54,7 +57,7 @@ cameraZInput.addEventListener('input', () => {
   // Translate camera position based on the change from the last Z value
   m4.translate(cameraPositionMain, 0, 0, (newZ - lastZ) * cameraSpeed, cameraPositionMain);
   lastZ = newZ; // Update the last Z value
-  console.log('Camera Z position updated:', cameraPositionMain);
+  // console.log('Camera Z position updated:', cameraPositionMain); //
 });
 
 // Reset camera position and FOV to default values

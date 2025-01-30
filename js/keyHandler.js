@@ -235,3 +235,81 @@ gl.canvas.addEventListener('click', (event) => {
   frontLightY = ray.origin[1] + ray.direction[1]; // Update the light's Y position
   frontLightZ = ray.origin[2] + ray.direction[2]; // Update the light's Z position
 });
+
+
+/*
+* MULTI TOUCH GESTURES
+*/
+
+let initialPinchDistance = null;
+let lastTouchX = null;
+let lastTouchY = null;
+
+canvas.addEventListener('touchstart', (event) => {
+    if (event.touches.length === 2) {
+        // Store initial distance for pinch gesture
+        const dx = event.touches[0].clientX - event.touches[1].clientX;
+        const dy = event.touches[0].clientY - event.touches[1].clientY;
+        initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
+
+        // Store initial positions for two-finger swipe
+        lastTouchX = (event.touches[0].clientX + event.touches[1].clientX) / 2;
+        lastTouchY = (event.touches[0].clientY + event.touches[1].clientY) / 2;
+    }
+});
+
+canvas.addEventListener('touchmove', (event) => {
+    if (event.touches.length === 2) {
+        const dx = event.touches[0].clientX - event.touches[1].clientX;
+        const dy = event.touches[0].clientY - event.touches[1].clientY;
+        const currentDistance = Math.sqrt(dx * dx + dy * dy);
+
+        // Handle pinch zoom
+        if (initialPinchDistance !== null) {
+            if (currentDistance > initialPinchDistance + 10) {
+                // Equivalent to pressing 'w' (move forward)
+                m4.translate(cameraPositionMain, 0, 0, -cameraSpeed, cameraPositionMain);
+            } else if (currentDistance < initialPinchDistance - 10) {
+                // Equivalent to pressing 's' (move backward)
+                m4.translate(cameraPositionMain, 0, 0, cameraSpeed, cameraPositionMain);
+            }
+            initialPinchDistance = currentDistance; // Update distance for next move
+        }
+
+        // Handle two-finger swipe (horizontal for 'a' and 'd', vertical for ArrowUp/ArrowDown)
+        const currentX = (event.touches[0].clientX + event.touches[1].clientX) / 2;
+        const currentY = (event.touches[0].clientY + event.touches[1].clientY) / 2;
+        const deltaX = currentX - lastTouchX;
+        const deltaY = currentY - lastTouchY;
+
+        if (Math.abs(deltaX) > 20) {
+            if (deltaX > 0) {
+                // Equivalent to pressing 'd' (move right)
+                m4.translate(cameraPositionMain, cameraSpeed, 0, 0, cameraPositionMain);
+            } else {
+                // Equivalent to pressing 'a' (move left)
+                m4.translate(cameraPositionMain, -cameraSpeed, 0, 0, cameraPositionMain);
+            }
+        }
+
+        if (Math.abs(deltaY) > 20) {
+            if (deltaY > 0) {
+                // Equivalent to pressing 'ArrowDown' (move down)
+                m4.translate(cameraPositionMain, 0, -cameraSpeed, 0, cameraPositionMain);
+            } else {
+                // Equivalent to pressing 'ArrowUp' (move up)
+                m4.translate(cameraPositionMain, 0, cameraSpeed, 0, cameraPositionMain);
+            }
+        }
+
+        lastTouchX = currentX;
+        lastTouchY = currentY;
+    }
+});
+
+canvas.addEventListener('touchend', (event) => {
+    if (event.touches.length < 2) {
+        // Reset values when gesture ends
+        initialPinchDistance = null;
+    }
+});

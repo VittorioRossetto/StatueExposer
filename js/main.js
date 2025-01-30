@@ -41,6 +41,9 @@ var statueTexture;
 // Variable to track the orientation of the statue (0 or 1 for different orientations)
 var statueOrientation = 0;
 
+// Field of view in radians
+var fieldOfViewRadians = degToRad(60);
+
 // Main function to initialize and render the scene
 async function main() {
   // Compile and link the shaders, and look up attribute and uniform locations
@@ -72,11 +75,13 @@ async function main() {
   // Variable to keep track of the previous frame's time
   var then = 0;
 
+  // Set the clear color to gray
+  gl.clearColor(0.3, 0.3, 0.3, 1.0);
+
   // Function to render the scene repeatedly
   function render(time) {
     time *= 0.001;  // Convert time to seconds
-    // Calculate the time difference between frames
-    var deltaTime = time - then;
+
     // Update the previous time for the next frame
     then = time;
 
@@ -86,7 +91,6 @@ async function main() {
     gl.enable(gl.DEPTH_TEST); // Enable depth testing for 3D rendering
 
     // Calculate the perspective projection matrix
-    const fieldOfViewRadians = degToRad(60); // Field of view in radians
     const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight; // Aspect ratio
     projection = m4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
 
