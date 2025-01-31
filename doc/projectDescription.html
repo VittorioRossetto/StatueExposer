@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Overview</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.8;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        header {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px 0;
+            text-align: center;
+            border-bottom: 4px solid #2980b9;
+        }
+        header h1 {
+            color: #ffffff;
+        }
+        header h2 {
+            color: #ffffff;
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 25px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.95em;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        ul li {
+            margin: 10px 0;
+        }
+        p {
+            margin: 15px 0;
+        }
+        .image-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .image-caption {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Statue Exposer</h1>
+        <h2>Vittorio Rossetto - 0001136868</h2>
+    </header>
+    <div class="container">
+        <h2>Introduction</h2>
+        <p>
+            This project showcases a feature-rich WebGL-based 3D viewer designed to load, display, and interact with 3D models. The application includes advanced rendering features such as environment mapping, dynamic texture application, and intuitive camera controls. By leveraging WebGL, users can experience high-performance, real-time rendering directly in the browser without any additional plugins.
+        </p>
+        <div class="image-container">
+            <img src="./img/screenshot.png" alt="Overview of the WebGL 3D Viewer">
+            <p class="image-caption">Figure 1: A screenshot showcasing the 3D viewer interface</p>
+        </div>
+
+        <h2>Project Structure</h2>
+        <p>
+            The project is organized into a logical folder structure, ensuring maintainability and clarity. Each directory and file has a specific role in the overall functionality of the 3D viewer. Below is the directory layout with a brief description of its contents:
+        </p>
+        <pre>
+.vscode/
+    settings.json         # Development environment settings for consistent formatting and linting
+
+data/
+    mickeyMouse/          # Example 3D model assets (Mickey Mouse)
+        mickeyMouse.mtl    # Material file for the model
+        mickeyMouse.obj    # 3D object file
+    pedestal/             # Example base model for displaying objects
+        pedestal.mtl       # Material file for the pedestal
+        pedestal.obj       # 3D object file
+    skybox/               # Environment texture files for creating the skybox. In the specific, colosseum images 
+        nx.jpg          # Negative X-axis texture
+        ny.jpg          # Negative Y-axis texture
+        nz.jpg          # Negative Z-axis texture
+        px.jpg          # Positive X-axis texture
+        py.jpg          # Positive Y-axis texture
+        pz.jpg          # Positive Z-axis texture
+
+js/                      # Core JavaScript files for application functionality
+    generalUtils.js       # Helper functions for common tasks
+    keyHandler.js         # Manages keyboard input for interactivity
+    load_mesh.js          # Functions to parse and load .OBJ files
+    main.js               # Main entry point of the application
+    panelHandler.js       # Handles user interaction with UI panels
+    shaders.js            # Defines and compiles shaders for WebGL
+    skybox.js             # Handles skybox creation for environment mapping
+    tangentGenerator.js   # Generates tangents for normal mapping
+    textureUtils.js       # Manages texture loading and application
+
+resources/               # Supporting libraries and utilities
+    glm_utils.js          # Matrix and vector math utilities
+    jquery-3.6.0.js       # jQuery library for DOM manipulation
+    m4.js                 # Comprehensive matrix and vector math library
+    mesh_utils.js         # Utility functions for 3D mesh handling
+    webgl-utils.js        # WebGL-specific utility functions
+
+statueExposer.html        # Main HTML file that initializes the 3D viewer
+        </pre>
+
+        <div class="image-container">
+            <p class="image-caption">Figure 2: Directory structure for better understanding of project organization</p>
+        </div>
+
+        <h2>Key Files and Their Roles</h2>
+        <h3>HTML Files</h3>
+        <ul>
+            <li>
+                <strong>statueExposer.html</strong>: The central HTML file for the project. It defines the WebGL canvas and links all necessary JavaScript and resource files to set up the 3D viewer interface. The file also includes the control panel for adjusting camera settings and uploading custom 3D models and textures, and the skybox shaders for environment mapping.
+            </li>
+        </ul>
+
+        <h3>JavaScript Files</h3>
+        <ul>
+            <li><strong>main.js</strong>: The heart of the application. It initializes the WebGL context, sets up the rendering loop, loads 3D models and textures, and manages the rendering pipeline.</li>
+            <li><strong>panelHandler.js</strong>: Manages user interaction with on-screen control panel: such as sliders for field of view and buttons for uploading files. It also includes functionality for rotating the 3D model using buttons in the panel.</li>
+            <li><strong>skybox.js</strong>: Implements the skybox, a surrounding cube that simulates a distant environment for immersive effects. In the specific the enviroment is the colpsseum of Rome. skybox can also be deactivated using the relative button in the panel</li>
+            <li><strong>textureUtils.js</strong>: Provides utility functions to load, bind, and manipulate textures for applying them to 3D models.</li>
+            <li><strong>shaders.js</strong>: Contains shader programs (both vertex and fragment shaders) for rendering, including lighting, texturing, and environment mapping techniques.</li>
+            <li><strong>keyHandler.js</strong>: Handles keyboard input for moving the camera or adjusting the view in real time. It also contains the functions for mouse and touch events.</li>
+            <li><strong>generalUtils.js</strong>: Contains general-purpose functions used throughout the project for various calculations and transformations.</li>
+            <li><strong>load_mesh.js</strong>: Provides functionality for parsing and loading .OBJ files, including associated materials and textures.</li>
+            <li><strong>tangentGenerator.js</strong>: Generates tangent data required for advanced normal mapping effects.</li>
+        </ul>
+
+        <h3>Resources</h3>
+        <ul>
+            <li><strong>glm_utils.js</strong>: Offers matrix and vector operations essential for 3D transformations and calculations.</li>
+            <li><strong>jquery-3.6.0.js</strong>: Simplifies DOM manipulation for managing user interfaces and interactivity.</li>
+            <li><strong>m4.js</strong>: A math library focused on matrix and vector operations for WebGL applications.</li>
+            <li><strong>mesh_utils.js</strong>: Aids in processing 3D meshes, including vertex data extraction and optimization.</li>
+            <li><strong>webgl-utils.js</strong>: Assists in setting up WebGL contexts and shaders, as well as debugging WebGL applications.</li>
+        </ul>
+
+        <h2>How to Use</h2>
+        <p>Follow these steps to get started with the application:</p>
+        <ol>
+            <li><strong>Download the project:</strong> Clone or download the project files from the <a href="https://github.com/VittorioRossetto/StatueExposer" target="_blank">GitHub repository</a>.</li>
+            <li><strong>Install a local server:</strong> The program requires a local server to function. You cannot simply open <strong>statueExposer.html</strong> in a browser. We recommend using the <a href="https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer" target="_blank">Live Server extension for VSCode</a>.</li>
+            <li><strong>Run the project:</strong>
+                <ul>
+                    <li>Open the project folder in VSCode.</li>
+                    <li>Right-click on <strong>statueExposer.html</strong> and select <strong>Open with Live Server</strong>.</li>
+                </ul>
+            </li>
+            <li><strong>Interact with the viewer:</strong>
+                <ul>
+                    <li><strong>Sliders:</strong> Adjust the field of view and camera position using the on-screen sliders.</li>
+                    <li><strong>Keyboard:</strong> Move the camera with the <strong>W, A, S, D</strong> and <strong>↑, ↓, ←, →</strong> keys.</li>
+                    <li><strong>Gestures:</strong> Rotate the model using touch or mouse gestures.</li>
+                    <li><strong>File Inputs:</strong> Upload new .OBJ models or textures using the provided file input buttons.</li>
+                    <li><strong>Plese Note:</strong> It is highly advised to upload wavefronts with geometry centered to the origin. The objects dimension is not important since the appliccation will automatically scale objects.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <div class="image-container">
+            <img src="./img/mobileScreenshot.png" alt="Mobile view example">
+            <p class="image-caption">Figure 3: Mobile view of the application</p>
+        </div>
+
+        <h2>Features</h2>
+        <ul>
+            <li>Support for loading and rendering 3D models in <strong>.OBJ</strong> format.</li>
+            <li>Dynamic texture application for realistic model rendering.</li>
+            <li>Environment mapping to simulate reflections and create immersive visuals.</li>
+            <li>Real-time camera controls through keyboard and on-screen sliders.</li>
+            <li>Interactive user interface for uploading custom models and textures.</li>
+            <li>Model rotation using touch gestures (on mobile devices) or buttons in the control panel.</li>
+            <li>Responsive design ensures usability across devices, including desktops, tablets, and mobile phones.</li>
+        </ul>
+
+        <div class="image-container">
+            <img src="./img/collageObjects.jpg" alt="Different OBJs">
+            <p class="image-caption">Figure 4: Three examples of different wavefronts (.obj) uploaded on the platform. All of them with a simple marble texture.</p>
+        </div>
+
+        <div class="image-container">
+            <img src="./img/collageTextures.jpg" alt="Different textures">
+            <p class="image-caption">Figure 5: Three examples of different textures uploaded on the platform and applied to the same object.</p>
+        </div>
+
+        <h2>Shaders</h2>
+        <p>
+            The <strong>shaders.js</strong> file defines the vertex and fragment shaders that power the rendering process. These shaders handle various graphical tasks such as lighting calculations, texture mapping, and environment mapping. The use of shaders enables realistic rendering effects by performing complex calculations directly on the GPU.
+        </p>
+
+        <h2>Modeling the Pedestal</h2>
+        <p>
+            The pedestal for this project was custom-designed to include the text "Statue Exposer" on its front face. This was achieved using Blender, a popular 3D modeling software. The steps involved:
+        </p>
+        <ol>
+            <li>Creating a basic pedestal shape using primitive shapes like cubes and cylinders.</li>
+            <li>Adding the "Statue Exposer" text as a 3D object in Blender and positioning it on the front face of the pedestal.</li>
+            <li>Using Boolean operations to merge the text into the pedestal geometry, ensuring seamless integration.</li>
+            <li>UV unwrapping to ensure correct texture rendering.</li>
+            <li>Exporting the completed pedestal model in <strong>.OBJ</strong> format.</li>
+        </ol>
+        <div class="image-container">
+            <img src="./img/blenderScreenshot.png" alt="Modeling the pedestal with text in Blender">
+            <p class="image-caption">Figure 4: The pedestal model in Blender with the "Statue Exposer" text integrated.</p>
+        </div>
+
+
+        <h2>Conclusion</h2>
+        <p>
+            This WebGL 3D viewer project demonstrates the potential of modern web technologies for creating interactive, high-performance 3D applications. With its modular structure, user-friendly controls, and advanced rendering techniques, this project serves as both a learning resource and a practical tool for visualizing 3D models in real time. The responsive design and gesture-based controls make it accessible across a variety of devices, enhancing user convenience and flexibility.
+        </p>
+    </div>
+</body>
+</html>
